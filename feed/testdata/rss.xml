@@ -1,0 +1,28 @@
+   <?xml version="1.0" encoding="utf-8"?>
+   <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+     <channel>     
+     <title type="text">Me, Myself and I</title>
+     <description>
+       My life is so cool I share it
+     </description>
+     <pubDate>2005-07-31T12:29:29Z</pubDate>
+     <link>http://example.org/</link>
+     <generator>RSS generator</generator>
+     <item>
+       <title>Breakfast</title>
+       <link>http://example.org/2005/04/02/breakfast</link>
+       <guid>tag:example.org,2003:3.2398</guid>
+       <pubDate>2003-12-13T08:29:29-04:00</pubDate>
+       <dc:creator>Peter J.</dc:creator>
+       <description>eggs and bacon, yup !</description>
+     </item>
+     <item>
+       <title>Dinner</title>
+       <link>http://example.org/2005/04/02/dinner</link>
+       <guid>tag:example.org,2003:3.2397</guid>
+       <pubDate>2003-12-13T20:29:29-04:00</pubDate>
+       <dc:creator>Peter J.</dc:creator>
+       <description>got soap delivered !</description>
+     </item>
+     </channel>
+   </rss>

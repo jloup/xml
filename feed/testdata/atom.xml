@@ -1,0 +1,37 @@
+   <?xml version="1.0" encoding="utf-8"?>
+   <feed xmlns="http://www.w3.org/2005/Atom">
+     <title type="text">Me, Myself and I</title>
+     <subtitle>
+       My life is so cool I share it
+     </subtitle>
+     <updated>2005-07-31T12:29:29Z</updated>
+     <link rel="alternate" type="text/html"
+      hreflang="en" href="http://example.org/"/>
+     <link rel="self" type="application/atom+xml"
+      href="http://example.org/feed.atom"/>
+     <rights>Copyright (c) 2003, Me</rights>
+     <generator uri="http://www.atomgenerator.com/" version="1.0" />
+     <entry>
+       <title>Breakfast</title>
+       <link rel="alternate" type="text/html"
+        href="http://example.org/2005/04/02/breakfast"/>
+       <id>tag:example.org,2003:3.2398</id>
+       <updated>2005-07-31T12:29:29Z</updated>
+       <published>2003-12-13T08:29:29-04:00</published>
+       <author>
+	       <name>Peter J.</name>
+       </author>
+       <summary>eggs and bacon, yup !</summary>
+     </entry>
+     <entry>
+       <title>Dinner</title>
+       <link rel="alternate" type="text/html"
+        href="http://example.org/2005/04/02/dinner"/>
+       <id>tag:example.org,2003:3.2397</id>
+       <published>2003-12-13T20:29:29-04:00</published>
+       <author>
+	       <name>Peter J.</name>
+       </author>
+       <summary>got soap delivered !</summary>
+     </entry>
+   </feed>
