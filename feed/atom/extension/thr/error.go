@@ -1,11 +1,11 @@
 package thr
 
 import (
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 	"github.com/JLoup/flag"
 )
 
 var (
-	LinkNotReplies   = flag.InitFlag(&helper.ErrorFlagCounter, "LinkNotReplies")
-	NotInLinkElement = flag.InitFlag(&helper.ErrorFlagCounter, "NotInLinkElement")
+	LinkNotReplies   = flag.InitFlag(&utils.ErrorFlagCounter, "LinkNotReplies")
+	NotInLinkElement = flag.InitFlag(&utils.ErrorFlagCounter, "NotInLinkElement")
 )

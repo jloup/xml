@@ -6,13 +6,13 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Content struct {
 	CommonAttributes
-	Type helper.Element
-	Src  helper.Element
+	Type utils.Element
+	Src  utils.Element
 
 	XHTML            *InlineXHTMLContent
 	PlainText        *InlineTextContent
@@ -21,14 +21,14 @@ type Content struct {
 
 	hasStarted bool
 	Extension  extension.VisitorExtension
-	Parent     helper.Visitor
+	Parent     utils.Visitor
 }
 
 func NewContent() *Content {
 	c := Content{hasStarted: false}
 
-	c.Type = helper.NewElement("type", "text", helper.Nop)
-	c.Src = helper.NewElement("src", "", helper.Nop)
+	c.Type = utils.NewElement("type", "text", utils.Nop)
+	c.Src = utils.NewElement("src", "", utils.Nop)
 
 	c.XHTML = NewInlineXHTMLContent()
 	c.PlainText = NewInlineTextContent()
@@ -62,11 +62,11 @@ func (c *Content) HasReadableContent() bool {
 	return c.hasStarted && (c.Type.Value == "text" || c.Type.Value == "html" || c.Type.Value == "xhtml" || c.InlineContent.HasReadableContent())
 }
 
-func (c *Content) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (c *Content) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	c.reset()
 	for _, attr := range el.Attr {
 		switch attr.Name.Space {
-		case helper.XML_NS:
+		case utils.XML_NS:
 			c.ProcessAttr(attr)
 		case "":
 			switch attr.Name.Local {
@@ -96,7 +96,7 @@ func (c *Content) ProcessStartElement(el helper.StartElement) (helper.Visitor, h
 	return c.InlineContent.ProcessStartElement(el)
 }
 
-func (c *Content) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
+func (c *Content) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
 	if c.Type.Value != "text" && c.Type.Value != "html" && c.Type.Value != "xhtml" {
 		if c.Parent != nil {
 			return c.Parent.ProcessEndElement(el)
@@ -106,11 +106,11 @@ func (c *Content) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.P
 	return c.Parent, nil
 }
 
-func (c *Content) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (c *Content) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return c, nil
 }
 
-func (c *Content) validate() helper.ParserError {
+func (c *Content) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
 	c.Extension.Validate(&error)

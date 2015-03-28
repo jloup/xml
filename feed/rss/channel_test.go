@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestChannel(
@@ -56,11 +56,11 @@ func NewTestChannel(
 
 type testChannel struct {
 	XML             string
-	ExpectedError   helper.ParserError
+	ExpectedError   utils.ParserError
 	ExpectedChannel *Channel
 }
 
-func testChannelValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testChannelValidator(actual utils.Visitor, expected utils.Visitor) error {
 	c1 := actual.(*Channel)
 	c2 := expected.(*Channel)
 
@@ -152,12 +152,12 @@ func testChannelValidator(actual helper.Visitor, expected helper.Visitor) error 
 	return nil
 }
 
-func testChannelConstructor() helper.Visitor {
+func testChannelConstructor() utils.Visitor {
 	return NewChannel()
 }
 
-func _TestChannelToTestVisitor(t testChannel) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestChannelToTestVisitor(t testChannel) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedChannel,
@@ -245,7 +245,7 @@ func TestChannelBasic(t *testing.T) {
                    <link>http://liftoff.msfc.nasa.gov/</link>
                    <description>Liftoff to Space Exploration.<a>yo'.com</a></description>
 	         </channel>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestChannel(
 				NewBasicElement(),
 				NewTestBasicElement("http://liftoff.msfc.nasa.gov/"),
@@ -272,7 +272,7 @@ func TestChannelBasic(t *testing.T) {
                    <title>Liftoff News</title>
                    <description>Liftoff to Space Exploration.<a>yo'.com</a></description>
 	         </channel>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestChannel(
 				NewTestBasicElement("Liftoff News"),
 				NewBasicElement(),
@@ -300,7 +300,7 @@ func TestChannelBasic(t *testing.T) {
                    <title>Liftoff News</title>
                    <link>http://liftoff.msfc.nasa.gov/</link>
 	         </channel>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestChannel(
 				NewTestBasicElement("Liftoff News"),
 				NewTestBasicElement("http://liftoff.msfc.nasa.gov/"),
@@ -331,7 +331,7 @@ func TestChannelBasic(t *testing.T) {
 		     <title>Star City</title>
                    </item>
 	         </channel>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestChannel(
 				NewTestBasicElement("Liftoff News"),
 				NewTestBasicElement("http://liftoff.msfc.nasa.gov/"),

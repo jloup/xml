@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -18,11 +18,11 @@ func NewTestEnclosure(url, length, typ string) *Enclosure {
 
 type testEnclosure struct {
 	XML               string
-	ExpectedError     helper.ParserError
+	ExpectedError     utils.ParserError
 	ExpectedEnclosure *Enclosure
 }
 
-func testEnclosureValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testEnclosureValidator(actual utils.Visitor, expected utils.Visitor) error {
 	e1 := actual.(*Enclosure)
 	e2 := expected.(*Enclosure)
 
@@ -40,12 +40,12 @@ func testEnclosureValidator(actual helper.Visitor, expected helper.Visitor) erro
 	return nil
 }
 
-func testEnclosureConstructor() helper.Visitor {
+func testEnclosureConstructor() utils.Visitor {
 	return NewEnclosure()
 }
 
-func _TestEnclosureToTestVisitor(t testEnclosure) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestEnclosureToTestVisitor(t testEnclosure) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedEnclosure,
@@ -67,15 +67,15 @@ func TestEnclosureBasic(t *testing.T) {
 			NewTestEnclosure("http://www.scripting.com/mp3s/weatherReportSuite.mp3", "12216320", "audio/mpeg"),
 		},
 		{`<enclosure length="12216320" type="audio/mpeg" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestEnclosure("", "12216320", "audio/mpeg"),
 		},
 		{`<enclosure url="http://www.scripting.com/mp3s/weatherReportSuite.mp3" type="audio/mpeg" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestEnclosure("http://www.scripting.com/mp3s/weatherReportSuite.mp3", "", "audio/mpeg"),
 		},
 		{`<enclosure url="http://www.scripting.com/mp3s/weatherReportSuite.mp3" length="12216320" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestEnclosure("http://www.scripting.com/mp3s/weatherReportSuite.mp3", "12216320", ""),
 		},
 	}

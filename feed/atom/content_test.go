@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestContent(contentType, xhtml, plaintext, other, outsource string) *Content {
@@ -28,11 +28,11 @@ func ContentWithBaseLang(c *Content, lang, base string) *Content {
 
 type testContent struct {
 	XML             string
-	ExpectedError   helper.ParserError
+	ExpectedError   utils.ParserError
 	ExpectedContent *Content
 }
 
-func testContentValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testContentValidator(actual utils.Visitor, expected utils.Visitor) error {
 	c1 := actual.(*Content)
 	c2 := expected.(*Content)
 
@@ -63,12 +63,12 @@ func testContentValidator(actual helper.Visitor, expected helper.Visitor) error 
 	return nil
 }
 
-func testContentConstructor() helper.Visitor {
+func testContentConstructor() utils.Visitor {
 	return NewContent()
 }
 
-func _TestContentToTestVisitor(t testContent) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestContentToTestVisitor(t testContent) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedContent,
@@ -105,32 +105,32 @@ func TestContentBasic(t *testing.T) {
 			NewTestContent("image/png", "", "", "", "image.png"),
 		},
 		{`<content src="/iri" type="text"/>`,
-			helper.NewError(ContentTypeIsNotValid, ""),
+			utils.NewError(ContentTypeIsNotValid, ""),
 			NewTestContent("text", "", "", "", "/iri"),
 		},
 		{`<content src="/iri" type="html"/>`,
-			helper.NewError(ContentTypeIsNotValid, ""),
+			utils.NewError(ContentTypeIsNotValid, ""),
 			NewTestContent("html", "", "", "", "/iri"),
 		},
 		{`<content src="/iri" type="xhtml"/>`,
-			helper.NewError(ContentTypeIsNotValid, ""),
+			utils.NewError(ContentTypeIsNotValid, ""),
 			NewTestContent("xhtml", "", "", "", "/iri"),
 		},
 		{`<content src="http://%g.com" type="application/xml"/>`,
-			helper.NewError(IriNotValid, ""),
+			utils.NewError(IriNotValid, ""),
 			NewTestContent("application/xml", "", "", "", "http://%g.com"),
 		},
 
 		{`<content src="http://g.com" type="application/xml">text</content>`,
-			helper.NewError(SourcedContentElementNotEmpty, ""),
+			utils.NewError(SourcedContentElementNotEmpty, ""),
 			NewTestContent("application/xml", "", "", "", "http://g.com"), // content is ignored
 		},
 		{`<content src="http://g.com" type="application/xml"><div>CHILD</div></content>`,
-			helper.NewError(SourcedContentElementNotEmpty, ""),
+			utils.NewError(SourcedContentElementNotEmpty, ""),
 			NewTestContent("application/xml", "", "", "", "http://g.com"), // content is ignored
 		},
 		{`<content src="http://g.com" type="xml"/>`,
-			helper.NewError(IsNotMIME, ""),
+			utils.NewError(IsNotMIME, ""),
 			NewTestContent("xml", "", "", "", "http://g.com"),
 		},
 		{`<content type="text/plain">text</content>`,
@@ -138,15 +138,15 @@ func TestContentBasic(t *testing.T) {
 			NewTestContent("text/plain", "", "text", "", ""),
 		},
 		{`<content type="text/plain"><div>CHILD</div></content>`,
-			helper.NewError(LeafElementHasChild, ""),
+			utils.NewError(LeafElementHasChild, ""),
 			NewTestContent("text/plain", "", "CHILD", "", ""),
 		},
 		{`<content type="text"><div>CHILD</div><p>CHILD2</p></content>`,
-			helper.NewError(LeafElementHasChild, ""),
+			utils.NewError(LeafElementHasChild, ""),
 			NewTestContent("text", "", "CHILD2", "", ""),
 		},
 		{`<content type="html"><div>CHILD</div></content>`,
-			helper.NewError(LeafElementHasChild, ""),
+			utils.NewError(LeafElementHasChild, ""),
 			NewTestContent("html", "", "CHILD", "", ""),
 		},
 		{`<content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">XHTML CHILD</div></content>`,
@@ -154,11 +154,11 @@ func TestContentBasic(t *testing.T) {
 			NewTestContent("xhtml", "<div>XHTML CHILD</div>", "", "", ""),
 		},
 		{`<content type="xhtml">XHTML CHILD</content>`,
-			helper.NewError(XHTMLRootNodeNotDiv, ""),
+			utils.NewError(XHTMLRootNodeNotDiv, ""),
 			NewTestContent("xhtml", "XHTML CHILD", "", "", ""),
 		},
 		{`<content type="multipart/mixed"></content>`,
-			helper.NewError(IsNotMIME, ""),
+			utils.NewError(IsNotMIME, ""),
 			NewTestContent("multipart/mixed", "", "", "", ""),
 		},
 	}

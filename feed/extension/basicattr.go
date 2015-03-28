@@ -3,18 +3,18 @@ package extension
 import (
 	"encoding/xml"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type BasicAttr struct {
 	Content   string
 	name      xml.Name
-	Validator helper.ElementValidator
+	Validator utils.ElementValidator
 
-	Parent helper.Visitor
+	Parent utils.Visitor
 }
 
-func NewBasicAttr(name xml.Name, validator helper.ElementValidator) BasicAttr {
+func NewBasicAttr(name xml.Name, validator utils.ElementValidator) BasicAttr {
 	return BasicAttr{name: name, Validator: validator}
 }
 
@@ -30,11 +30,11 @@ func (b *BasicAttr) Set(s string) {
 	b.Content = s
 }
 
-func (b *BasicAttr) SetParent(parent helper.Visitor) {
+func (b *BasicAttr) SetParent(parent utils.Visitor) {
 	b.Parent = parent
 }
 
-func (b *BasicAttr) Validate() helper.ParserError {
+func (b *BasicAttr) Validate() utils.ParserError {
 
 	if b.Validator == nil {
 		return nil

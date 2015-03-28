@@ -6,7 +6,7 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Feed struct {
@@ -26,9 +26,9 @@ type Feed struct {
 	Entries      []*Entry
 
 	Extension  extension.VisitorExtension
-	Occurences helper.OccurenceCollection
-	depth      helper.DepthWatcher
-	Parent     helper.Visitor
+	Occurences utils.OccurenceCollection
+	depth      utils.DepthWatcher
+	Parent     utils.Visitor
 }
 
 func NewFeed() *Feed {
@@ -42,7 +42,7 @@ func NewFeed() *Feed {
 		Title:     NewTextConstruct(),
 		Updated:   NewDate(),
 
-		depth: helper.NewDepthWatcher(),
+		depth: utils.NewDepthWatcher(),
 	}
 
 	f.init()
@@ -61,7 +61,7 @@ func NewFeedExt(manager extension.Manager) *Feed {
 		Title:     NewTextConstructExt(manager),
 		Updated:   NewDateExt(manager),
 
-		depth: helper.NewDepthWatcher(),
+		depth: utils.NewDepthWatcher(),
 	}
 
 	f.init()
@@ -82,15 +82,15 @@ func (f *Feed) init() {
 
 	f.InitCommonAttributes()
 
-	f.Occurences = helper.NewOccurenceCollection(
-		helper.NewOccurence("generator", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("icon", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("logo", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("id", helper.ExistsAndUniqueValidator(MissingId, IdDuplicated)),
-		helper.NewOccurence("rights", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("subtitle", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("title", helper.ExistsAndUniqueValidator(MissingTitle, TitleDuplicated)),
-		helper.NewOccurence("updated", helper.ExistsAndUniqueValidator(MissingDate, AttributeDuplicated)),
+	f.Occurences = utils.NewOccurenceCollection(
+		utils.NewOccurence("generator", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("icon", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("logo", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("id", utils.ExistsAndUniqueValidator(MissingId, IdDuplicated)),
+		utils.NewOccurence("rights", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("subtitle", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("title", utils.ExistsAndUniqueValidator(MissingTitle, TitleDuplicated)),
+		utils.NewOccurence("updated", utils.ExistsAndUniqueValidator(MissingDate, AttributeDuplicated)),
 	)
 
 }
@@ -100,7 +100,7 @@ func (f *Feed) reset() {
 	f.Occurences.Reset()
 }
 
-func (f *Feed) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (f *Feed) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if f.depth.IsRoot() {
 		f.reset()
 		for _, attr := range el.Attr {
@@ -185,22 +185,22 @@ func (f *Feed) ProcessStartElement(el helper.StartElement) (helper.Visitor, help
 	return f, nil
 }
 
-func (f *Feed) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if f.depth.Up() == helper.RootLevel {
+func (f *Feed) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if f.depth.Up() == utils.RootLevel {
 		return f.Parent, f.validate()
 	}
 
 	return f, nil
 }
 
-func (f *Feed) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (f *Feed) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return f, nil
 }
 
-func (f *Feed) validate() helper.ParserError {
+func (f *Feed) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateOccurenceCollection("feed", &error, f.Occurences)
+	utils.ValidateOccurenceCollection("feed", &error, f.Occurences)
 	f.Extension.Validate(&error)
 
 	f.validateLinks(&error)
@@ -220,7 +220,7 @@ func (f *Feed) validateEntries(err *errors.ErrorAggregator) {
 		for _, comb := range combinations {
 
 			if s == comb {
-				err.NewError(helper.NewError(EntryWithIdAndDateDuplicated, fmt.Sprintf("Entries are duplicated: id '%s' updated '%s'", entry.Id.Content.Value, entry.Updated.Time.String())))
+				err.NewError(utils.NewError(EntryWithIdAndDateDuplicated, fmt.Sprintf("Entries are duplicated: id '%s' updated '%s'", entry.Id.Content.Value, entry.Updated.Time.String())))
 				unique = false
 			}
 		}
@@ -245,7 +245,7 @@ func (f *Feed) validateAuthors(err *errors.ErrorAggregator) {
 	}
 
 	if count > 0 || len(f.Entries) == 0 {
-		err.NewError(helper.NewError(MissingAuthor, fmt.Sprintf("%v entry(ies) are missing author reference", count)))
+		err.NewError(utils.NewError(MissingAuthor, fmt.Sprintf("%v entry(ies) are missing author reference", count)))
 	}
 }
 
@@ -260,7 +260,7 @@ func (f *Feed) validateLinks(err *errors.ErrorAggregator) {
 
 			for _, comb := range combinations {
 				if s == comb {
-					err.NewError(helper.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
+					err.NewError(utils.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
 					unique = false
 				}
 			}
@@ -274,6 +274,6 @@ func (f *Feed) validateLinks(err *errors.ErrorAggregator) {
 	}
 
 	if !hasSelf {
-		err.NewError(helper.NewError(MissingSelfLink, "Feed must have a link with rel attribute set to 'self'"))
+		err.NewError(utils.NewError(MissingSelfLink, "Feed must have a link with rel attribute set to 'self'"))
 	}
 }

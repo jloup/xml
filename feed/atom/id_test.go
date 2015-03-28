@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestId(iri string) *Id {
@@ -23,11 +23,11 @@ func IdWithBaseLang(i *Id, lang, base string) *Id {
 
 type testId struct {
 	XML           string
-	ExpectedError helper.ParserError
+	ExpectedError utils.ParserError
 	ExpectedId    *Id
 }
 
-func testIdValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testIdValidator(actual utils.Visitor, expected utils.Visitor) error {
 	i1 := actual.(*Id)
 	i2 := expected.(*Id)
 
@@ -42,12 +42,12 @@ func testIdValidator(actual helper.Visitor, expected helper.Visitor) error {
 	return nil
 }
 
-func testIdConstructor() helper.Visitor {
+func testIdConstructor() utils.Visitor {
 	return NewId()
 }
 
-func testIdToTestVisitor(t testId) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func testIdToTestVisitor(t testId) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedId,
@@ -74,13 +74,13 @@ func TestIdBasic(t *testing.T) {
 			NewTestId("https://www.yo.com"),
 		},
 		{`<id>https://www.%yo.com</id>`,
-			helper.NewError(IriNotAbsolute, ""),
+			utils.NewError(IriNotAbsolute, ""),
 			NewTestId("https://www.%yo.com"),
 		},
 		{`<id>
       https://www.%yo.com
      </id>`,
-			helper.NewError(IriNotAbsolute, ""),
+			utils.NewError(IriNotAbsolute, ""),
 			NewTestId("https://www.%yo.com"),
 		},
 	}

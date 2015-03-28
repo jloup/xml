@@ -5,7 +5,7 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Image struct {
@@ -17,12 +17,12 @@ type Image struct {
 	Description *BasicElement
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewImage() *Image {
-	i := Image{depth: helper.NewDepthWatcher()}
+	i := Image{depth: utils.NewDepthWatcher()}
 
 	i.Url = NewBasicElement()
 	i.Title = NewBasicElement()
@@ -37,7 +37,7 @@ func NewImage() *Image {
 }
 
 func NewImageExt(manager extension.Manager) *Image {
-	i := Image{depth: helper.NewDepthWatcher()}
+	i := Image{depth: utils.NewDepthWatcher()}
 
 	i.Url = NewBasicElementExt(manager)
 	i.Title = NewBasicElementExt(manager)
@@ -53,23 +53,23 @@ func NewImageExt(manager extension.Manager) *Image {
 }
 
 func (i *Image) init() {
-	i.Url.Content = helper.NewElement("url", "", helper.Nop)
-	i.Url.Content.SetOccurence(helper.NewOccurence("url", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	i.Url.Content = utils.NewElement("url", "", utils.Nop)
+	i.Url.Content.SetOccurence(utils.NewOccurence("url", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	i.Title.Content = helper.NewElement("title", "", helper.Nop)
-	i.Title.Content.SetOccurence(helper.NewOccurence("title", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	i.Title.Content = utils.NewElement("title", "", utils.Nop)
+	i.Title.Content.SetOccurence(utils.NewOccurence("title", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	i.Link.Content = helper.NewElement("link", "", helper.Nop)
-	i.Link.Content.SetOccurence(helper.NewOccurence("link", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	i.Link.Content = utils.NewElement("link", "", utils.Nop)
+	i.Link.Content.SetOccurence(utils.NewOccurence("link", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	i.Width.Content = helper.NewElement("width", "", helper.Nop)
-	i.Width.Content.SetOccurence(helper.NewOccurence("width", helper.UniqueValidator(AttributeDuplicated)))
+	i.Width.Content = utils.NewElement("width", "", utils.Nop)
+	i.Width.Content.SetOccurence(utils.NewOccurence("width", utils.UniqueValidator(AttributeDuplicated)))
 
-	i.Height.Content = helper.NewElement("height", "", helper.Nop)
-	i.Height.Content.SetOccurence(helper.NewOccurence("height", helper.UniqueValidator(AttributeDuplicated)))
+	i.Height.Content = utils.NewElement("height", "", utils.Nop)
+	i.Height.Content.SetOccurence(utils.NewOccurence("height", utils.UniqueValidator(AttributeDuplicated)))
 
-	i.Description.Content = helper.NewElement("description", "", helper.Nop)
-	i.Description.Content.SetOccurence(helper.NewOccurence("description", helper.UniqueValidator(AttributeDuplicated)))
+	i.Description.Content = utils.NewElement("description", "", utils.Nop)
+	i.Description.Content.SetOccurence(utils.NewOccurence("description", utils.UniqueValidator(AttributeDuplicated)))
 
 	i.Url.Parent = i
 	i.Title.Parent = i
@@ -88,7 +88,7 @@ func (i *Image) reset() {
 	i.Description.Content.Reset()
 }
 
-func (i *Image) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (i *Image) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if i.depth.IsRoot() {
 		i.reset()
 		for _, attr := range el.Attr {
@@ -133,8 +133,8 @@ func (i *Image) ProcessStartElement(el helper.StartElement) (helper.Visitor, hel
 	return i, nil
 }
 
-func (i *Image) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if i.depth.Up() == helper.RootLevel {
+func (i *Image) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if i.depth.Up() == utils.RootLevel {
 
 		return i.Parent, i.validate()
 	}
@@ -142,14 +142,14 @@ func (i *Image) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.Par
 	return i, nil
 }
 
-func (i *Image) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (i *Image) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return i, nil
 }
 
-func (i *Image) validate() helper.ParserError {
+func (i *Image) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElements("image", &error, i.Url.Content, i.Title.Content, i.Link.Content, i.Width.Content, i.Height.Content, i.Description.Content)
+	utils.ValidateElements("image", &error, i.Url.Content, i.Title.Content, i.Link.Content, i.Width.Content, i.Height.Content, i.Description.Content)
 	i.Extension.Validate(&error)
 
 	return error.ErrorObject()

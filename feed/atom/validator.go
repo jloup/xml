@@ -3,28 +3,28 @@ package atom
 import (
 	"fmt"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 var (
-	IsAbsoluteIRI  = helper.IsValidAbsoluteIri(IriNotAbsolute)
-	IsValidIRI     = helper.IsValidIri(IriNotValid)
-	IsValidLength  = helper.IsValidNumber(NotPositiveNumber)
-	IsValidMIME    = helper.IsValidMIME(IsNotMIME)
-	IsXMLMediaType = helper.IsValidXMLMediaType(NotXMLMediaType)
+	IsAbsoluteIRI  = utils.IsValidAbsoluteIri(IriNotAbsolute)
+	IsValidIRI     = utils.IsValidIri(IriNotValid)
+	IsValidLength  = utils.IsValidNumber(NotPositiveNumber)
+	IsValidMIME    = utils.IsValidMIME(IsNotMIME)
+	IsXMLMediaType = utils.IsValidXMLMediaType(NotXMLMediaType)
 )
 
-func relIsIANA(name, s string) helper.ParserError {
+func relIsIANA(name, s string) utils.ParserError {
 	if s == "alternate" || s == "related" || s == "self" || s == "enclosure" || s == "via" {
 		return nil
 	}
 
-	return helper.NewError(RelNotValid, fmt.Sprintf("rel is not valid: %s", s))
+	return utils.NewError(RelNotValid, fmt.Sprintf("rel is not valid: %s", s))
 }
 
-func contentTypeIsValid(name, s string) helper.ParserError {
+func contentTypeIsValid(name, s string) utils.ParserError {
 	if s == "text" || s == "html" || s == "xhtml" {
-		return helper.NewError(ContentTypeIsNotValid, "type not valid")
+		return utils.NewError(ContentTypeIsNotValid, "type not valid")
 	}
 
 	return nil

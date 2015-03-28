@@ -6,7 +6,7 @@ import (
 
 	"github.com/JLoup/xml/feed/atom"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestThrEntry(links []*atom.Link, total, href, ref, typ, source string) *atom.Entry {
@@ -52,7 +52,7 @@ func NewTestThrLink(updated, count string) *atom.Link {
 
 type testThrEntry struct {
 	XML              string
-	ExpectedError    helper.ParserError
+	ExpectedError    utils.ParserError
 	ExpectedThrEntry *atom.Entry
 }
 
@@ -76,7 +76,7 @@ func testInReplyToValidator(actual *InReplyTo, expected *InReplyTo) error {
 	return nil
 }
 
-func testThrEntryValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testThrEntryValidator(actual utils.Visitor, expected utils.Visitor) error {
 	e1 := actual.(*atom.Entry)
 	e2 := expected.(*atom.Entry)
 
@@ -141,24 +141,24 @@ func testThrEntryValidator(actual helper.Visitor, expected helper.Visitor) error
 	return nil
 }
 
-func testThrEntryConstructor() helper.Visitor {
+func testThrEntryConstructor() utils.Visitor {
 	manager := extension.Manager{}
 	AddToManager(&manager)
 
 	return atom.NewEntryExt(manager)
 }
 
-func _TestThrEntryToTestVisitor(t testThrEntry) helper.TestVisitor {
-	customError := helper.NewErrorChecker(helper.DisableAllError)
+func _TestThrEntryToTestVisitor(t testThrEntry) utils.TestVisitor {
+	customError := utils.NewErrorChecker(utils.DisableAllError)
 
 	customError.EnableErrorChecking("in-reply-to", atom.MissingAttribute)
 	customError.EnableErrorChecking("in-reply-to", atom.AttributeDuplicated)
 	customError.EnableErrorChecking("entry", atom.AttributeDuplicated)
 	customError.EnableErrorChecking("link", LinkNotReplies)
 	customError.EnableErrorChecking("link", NotInLinkElement)
-	customError.EnableErrorChecking(helper.AllError, atom.NotPositiveNumber)
+	customError.EnableErrorChecking(utils.AllError, atom.NotPositiveNumber)
 
-	testVisitor := helper.TestVisitor{
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedThrEntry,
@@ -223,7 +223,7 @@ func TestThrEntryBasic(t *testing.T) {
      <entry xmlns:thr="http://purl.org/syndication/thread/1.0">
        <link thr:count="10" thr:updated="2003-12-13T18:30:02Z" href="http://example.org/2003/12/13/atom03"/>
      </entry>`,
-			helper.NewError(LinkNotReplies, ""),
+			utils.NewError(LinkNotReplies, ""),
 			NewTestThrEntry(
 				[]*atom.Link{
 					NewTestThrLink("2003-12-13T18:30:02Z", "10"),
@@ -258,7 +258,7 @@ func TestThrEntryBasic(t *testing.T) {
      <entry xmlns:thr="http://purl.org/syndication/thread/1.0">
        <link rel="replies" thr:count="1ss0" thr:updated="2003-12-13T18:30:02Z" href="http://example.org/2003/12/13/atom03"/>
      </entry>`,
-			helper.NewError(atom.NotPositiveNumber, ""),
+			utils.NewError(atom.NotPositiveNumber, ""),
 			NewTestThrEntry(
 				[]*atom.Link{
 					NewTestThrLink("2003-12-13T18:30:02Z", "1ss0"),
@@ -274,7 +274,7 @@ func TestThrEntryBasic(t *testing.T) {
      <entry xmlns:thr="http://purl.org/syndication/thread/1.0">
        <thr:total>4s4</thr:total>
      </entry>`,
-			helper.NewError(atom.NotPositiveNumber, ""),
+			utils.NewError(atom.NotPositiveNumber, ""),
 			NewTestThrEntry(
 				nil,
 				"4s4",
@@ -295,7 +295,7 @@ func TestThrEntryBasic(t *testing.T) {
          href="http://www.example.org/entries/2"
          ref="http://www.example.org/entries/2" />
      </entry>`,
-			helper.NewError(atom.AttributeDuplicated, ""),
+			utils.NewError(atom.AttributeDuplicated, ""),
 			NewTestThrEntry(
 				nil,
 				"",

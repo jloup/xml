@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestSource(
@@ -47,11 +47,11 @@ func SourceWithBaseLang(s *Source, lang, base string) *Source {
 
 type testSource struct {
 	XML            string
-	ExpectedError  helper.ParserError
+	ExpectedError  utils.ParserError
 	ExpectedSource *Source
 }
 
-func testSourceValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testSourceValidator(actual utils.Visitor, expected utils.Visitor) error {
 	s1 := actual.(*Source)
 	s2 := expected.(*Source)
 
@@ -138,12 +138,12 @@ func testSourceValidator(actual helper.Visitor, expected helper.Visitor) error {
 	return nil
 }
 
-func testSourceConstructor() helper.Visitor {
+func testSourceConstructor() utils.Visitor {
 	return NewSource()
 }
 
-func _TestSourceToTestVisitor(t testSource) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestSourceToTestVisitor(t testSource) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedSource,
@@ -280,7 +280,7 @@ func TestSourceBasic(t *testing.T) {
     <generator uri="http://there.com" version="4.0">my generator</generator>
     <generator uri="http://there2.com" version="5.0">my generator bis</generator>
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -304,7 +304,7 @@ func TestSourceBasic(t *testing.T) {
     <icon>https://www.yo.com</icon>
     <icon>https://www.yo2.com</icon>
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -327,7 +327,7 @@ func TestSourceBasic(t *testing.T) {
     <id>tag:example.org,2003:3</id>  
     <id>tag:example.org,2010:3</id>
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -348,7 +348,7 @@ func TestSourceBasic(t *testing.T) {
     <title type="text">dive into mark</title>
     <updated>2005-07-31T12:29:29Z</updated>
   </source>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -372,7 +372,7 @@ func TestSourceBasic(t *testing.T) {
     <logo>https://www.yo.com</logo>
     <logo>https://www.yo2.com</logo>
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -396,7 +396,7 @@ func TestSourceBasic(t *testing.T) {
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
     <rights>Copyright (c) 2006, Mark Pilgrim</rights>
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -420,7 +420,7 @@ func TestSourceBasic(t *testing.T) {
     <subtitle type="html">First</subtitle>
     <subtitle type="html">Second</subtitle>
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -443,7 +443,7 @@ func TestSourceBasic(t *testing.T) {
     <id>tag:example.org,2003:3</id> 
     <title type="html">Second title</title>
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -464,7 +464,7 @@ func TestSourceBasic(t *testing.T) {
     <updated>2005-07-31T12:29:29Z</updated>
     <id>tag:example.org,2003:3</id> 
   </source>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -485,7 +485,7 @@ func TestSourceBasic(t *testing.T) {
     <title type="text">dive into mark</title>
     <id>tag:example.org,2003:3</id> 
   </source>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -508,7 +508,7 @@ func TestSourceBasic(t *testing.T) {
     <updated>2010-07-31T12:29:29Z</updated>
     <id>tag:example.org,2003:3</id> 
   </source>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -531,7 +531,7 @@ func TestSourceBasic(t *testing.T) {
     <id>tag:example.org,2003:3</id> 
     <entry></entry>
   </source>`,
-			helper.NewError(AttributeForbidden, ""),
+			utils.NewError(AttributeForbidden, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -555,7 +555,7 @@ func TestSourceBasic(t *testing.T) {
     <link href="http://example.com" hreflang="en" type="application/xhtml+xml"/>
     <link href="http://example.com" hreflang="en" type="application/xhtml+xml"/>
   </source>`,
-			helper.NewError(LinkAlternateDuplicated, ""),
+			utils.NewError(LinkAlternateDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,
@@ -582,7 +582,7 @@ func TestSourceBasic(t *testing.T) {
     <link href="http://example.com" type="application/xhtml+xml"/>
     <link href="http://example.com" type="application/xhtml+xml"/>
   </source>`,
-			helper.NewError(LinkAlternateDuplicated, ""),
+			utils.NewError(LinkAlternateDuplicated, ""),
 			NewTestSource(
 				nil,
 				nil,

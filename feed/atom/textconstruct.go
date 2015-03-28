@@ -5,7 +5,7 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type TextConstruct struct {
@@ -16,7 +16,7 @@ type TextConstruct struct {
 	PlainText *InlineTextContent
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
+	Parent    utils.Visitor
 }
 
 func NewTextConstruct() *TextConstruct {
@@ -41,14 +41,14 @@ func (t *TextConstruct) reset() {
 	t.Type = "text"
 }
 
-func (t *TextConstruct) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (t *TextConstruct) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	t.name = el.Name.Local
 	t.Extension = extension.InitExtension(t.name, t.Extension.Manager)
 	t.reset()
 
 	for _, attr := range el.Attr {
 		switch attr.Name.Space {
-		case helper.XML_NS:
+		case utils.XML_NS:
 			t.ProcessAttr(attr)
 
 		case "":
@@ -74,11 +74,11 @@ func (t *TextConstruct) ProcessStartElement(el helper.StartElement) (helper.Visi
 	return t.PlainText, nil
 }
 
-func (t *TextConstruct) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
+func (t *TextConstruct) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
 	return t.Parent, t.Validate()
 }
 
-func (t *TextConstruct) Validate() helper.ParserError {
+func (t *TextConstruct) Validate() utils.ParserError {
 	err := errors.NewErrorAggregator()
 
 	t.ValidateCommonAttributes(t.name, &err)
@@ -86,7 +86,7 @@ func (t *TextConstruct) Validate() helper.ParserError {
 	return err.ErrorObject()
 }
 
-func (t *TextConstruct) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (t *TextConstruct) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return t, nil
 }
 

@@ -5,22 +5,22 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Logo struct {
 	CommonAttributes
-	Iri helper.Element
+	Iri utils.Element
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewLogo() *Logo {
-	l := Logo{depth: helper.NewDepthWatcher()}
+	l := Logo{depth: utils.NewDepthWatcher()}
 
-	l.Iri = helper.NewElement("iri", "", IsValidIRI)
+	l.Iri = utils.NewElement("iri", "", IsValidIRI)
 
 	l.InitCommonAttributes()
 	l.depth.SetMaxDepth(1)
@@ -35,7 +35,7 @@ func NewLogoExt(manager extension.Manager) *Logo {
 	return l
 }
 
-func (l *Logo) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (l *Logo) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if l.depth.IsRoot() {
 		l.ResetAttr()
 		for _, attr := range el.Attr {
@@ -45,30 +45,30 @@ func (l *Logo) ProcessStartElement(el helper.StartElement) (helper.Visitor, help
 		}
 	}
 
-	if l.depth.Down() == helper.MaxDepthReached {
-		return l, helper.NewError(LeafElementHasChild, "logo element should not have childs")
+	if l.depth.Down() == utils.MaxDepthReached {
+		return l, utils.NewError(LeafElementHasChild, "logo element should not have childs")
 	}
 
 	return l, nil
 }
 
-func (l *Logo) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if l.depth.Up() == helper.RootLevel {
+func (l *Logo) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if l.depth.Up() == utils.RootLevel {
 		return l.Parent, l.validate()
 	}
 
 	return l, nil
 }
 
-func (l *Logo) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (l *Logo) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	l.Iri.Value = string(el)
 	return l, nil
 }
 
-func (l *Logo) validate() helper.ParserError {
+func (l *Logo) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElement("logo", l.Iri, &error)
+	utils.ValidateElement("logo", l.Iri, &error)
 	l.ValidateCommonAttributes("logo", &error)
 	l.Extension.Validate(&error)
 

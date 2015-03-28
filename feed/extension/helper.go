@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 
 	"github.com/JLoup/errors"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type VisitorExtension struct {
@@ -24,7 +24,7 @@ func InitExtension(name string, manager Manager) VisitorExtension {
 	return v
 }
 
-func (v *VisitorExtension) ProcessElement(el helper.StartElement, parent helper.Visitor) (helper.Visitor, helper.ParserError) {
+func (v *VisitorExtension) ProcessElement(el utils.StartElement, parent utils.Visitor) (utils.Visitor, utils.ParserError) {
 	if constructor := v.Repository.GetElement(el.Name); constructor == nil {
 		return nil, nil
 
@@ -40,7 +40,7 @@ func (v *VisitorExtension) ProcessElement(el helper.StartElement, parent helper.
 
 }
 
-func (v *VisitorExtension) ProcessAttr(attr xml.Attr, parent helper.Visitor) {
+func (v *VisitorExtension) ProcessAttr(attr xml.Attr, parent utils.Visitor) {
 	if constructor := v.Repository.GetAttr(attr.Name); constructor != nil {
 		ext := constructor()
 		ext.SetParent(parent)
@@ -50,6 +50,6 @@ func (v *VisitorExtension) ProcessAttr(attr xml.Attr, parent helper.Visitor) {
 }
 
 func (v *VisitorExtension) Validate(errorAgg *errors.ErrorAggregator) {
-	helper.ValidateOccurenceCollection(v.name, errorAgg, v.Store.Occ)
+	utils.ValidateOccurenceCollection(v.name, errorAgg, v.Store.Occ)
 	v.Store.Validate(errorAgg)
 }

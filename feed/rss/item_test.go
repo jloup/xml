@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -51,11 +51,11 @@ func NewTestUnescapedContent(content string) *UnescapedContent {
 
 type testItem struct {
 	XML           string
-	ExpectedError helper.ParserError
+	ExpectedError utils.ParserError
 	ExpectedItem  *Item
 }
 
-func testItemValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testItemValidator(actual utils.Visitor, expected utils.Visitor) error {
 	i1 := actual.(*Item)
 	i2 := expected.(*Item)
 
@@ -109,12 +109,12 @@ func testItemValidator(actual helper.Visitor, expected helper.Visitor) error {
 	return nil
 }
 
-func testItemConstructor() helper.Visitor {
+func testItemConstructor() utils.Visitor {
 	return NewItem()
 }
 
-func _TestItemToTestVisitor(t testItem) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestItemToTestVisitor(t testItem) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedItem,
@@ -198,7 +198,7 @@ func TestItemBasic(t *testing.T) {
 		{`
                  <item>
                  </item>`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestItem(
 				NewBasicElement(),
 				NewBasicElement(),
@@ -217,7 +217,7 @@ func TestItemBasic(t *testing.T) {
 		  <title>Star City</title>
                   <title>Star City 2</title>
 		  </item>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestItem(
 				NewTestBasicElement("Star City 2"),
 				NewBasicElement(),

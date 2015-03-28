@@ -6,23 +6,23 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Guid struct {
-	IsPermalink helper.Element
-	Content     helper.Element
+	IsPermalink utils.Element
+	Content     utils.Element
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewGuid() *Guid {
-	g := Guid{depth: helper.NewDepthWatcher()}
+	g := Guid{depth: utils.NewDepthWatcher()}
 
-	g.IsPermalink = helper.NewElement("isPermalink", "true", helper.Nop)
-	g.IsPermalink.SetOccurence(helper.NewOccurence("isPermalink", helper.UniqueValidator(AttributeDuplicated)))
+	g.IsPermalink = utils.NewElement("isPermalink", "true", utils.Nop)
+	g.IsPermalink.SetOccurence(utils.NewOccurence("isPermalink", utils.UniqueValidator(AttributeDuplicated)))
 
 	return &g
 }
@@ -39,7 +39,7 @@ func (g *Guid) reset() {
 	g.IsPermalink.Value = "true"
 }
 
-func (g *Guid) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (g *Guid) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if g.depth.IsRoot() {
 		g.reset()
 		for _, attr := range el.Attr {
@@ -61,23 +61,23 @@ func (g *Guid) ProcessStartElement(el helper.StartElement) (helper.Visitor, help
 	return g, nil
 }
 
-func (g *Guid) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if g.depth.Up() == helper.RootLevel {
+func (g *Guid) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if g.depth.Up() == utils.RootLevel {
 		return g.Parent, g.validate()
 	}
 
 	return g, nil
 }
 
-func (g *Guid) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (g *Guid) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	g.Content.Value = strings.TrimSpace(string(el))
 	return g, nil
 }
 
-func (g *Guid) validate() helper.ParserError {
+func (g *Guid) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElements("guid", &error, g.IsPermalink)
+	utils.ValidateElements("guid", &error, g.IsPermalink)
 	g.Extension.Validate(&error)
 
 	return error.ErrorObject()

@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -17,11 +17,11 @@ func NewTestCategory(domain, content string) *Category {
 
 type testCategory struct {
 	XML              string
-	ExpectedError    helper.ParserError
+	ExpectedError    utils.ParserError
 	ExpectedCategory *Category
 }
 
-func testCategoryValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testCategoryValidator(actual utils.Visitor, expected utils.Visitor) error {
 	c1 := actual.(*Category)
 	c2 := expected.(*Category)
 
@@ -36,12 +36,12 @@ func testCategoryValidator(actual helper.Visitor, expected helper.Visitor) error
 	return nil
 }
 
-func testCategoryConstructor() helper.Visitor {
+func testCategoryConstructor() utils.Visitor {
 	return NewCategory()
 }
 
-func _TestCategoryToTestVisitor(t testCategory) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestCategoryToTestVisitor(t testCategory) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedCategory,

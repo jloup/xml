@@ -5,13 +5,13 @@ import (
 	"io"
 
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 // ParseOptions is passed to Parse functions to customize their behaviors
 type ParseOptions struct {
 	ExtensionManager extension.Manager
-	ErrorFlags       helper.FlagChecker
+	ErrorFlags       utils.FlagChecker
 }
 
 // DefaultOptions set options in order to have:
@@ -20,7 +20,7 @@ type ParseOptions struct {
 var DefaultOptions ParseOptions
 
 func init() {
-	errorFlags := helper.NewErrorChecker(helper.DisableAllError)
+	errorFlags := utils.NewErrorChecker(utils.DisableAllError)
 	DefaultOptions = ParseOptions{
 		extension.Manager{},
 		&errorFlags,
@@ -31,7 +31,7 @@ func init() {
 func ParseCustom(r io.Reader, feed UserFeed, options ParseOptions) error {
 	w := newWrapperExt(options.ExtensionManager)
 
-	err := helper.Walk(r, w, options.ErrorFlags)
+	err := utils.Walk(r, w, options.ErrorFlags)
 
 	if err != nil {
 		return err

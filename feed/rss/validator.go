@@ -1,7 +1,7 @@
 package rss
 
-import "github.com/JLoup/xml/helper"
+import "github.com/JLoup/xml/utils"
 
 var (
-	IsValidIRI = helper.IsValidIri(IriNotValid)
+	IsValidIRI = utils.IsValidIri(IriNotValid)
 )

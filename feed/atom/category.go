@@ -5,31 +5,31 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Category struct {
 	CommonAttributes
-	Term   helper.Element
-	Scheme helper.Element
-	Label  helper.Element
-	Parent helper.Visitor
+	Term   utils.Element
+	Scheme utils.Element
+	Label  utils.Element
+	Parent utils.Visitor
 
 	Extension extension.VisitorExtension
-	depth     helper.DepthWatcher
+	depth     utils.DepthWatcher
 }
 
 func NewCategory() *Category {
-	c := Category{depth: helper.NewDepthWatcher()}
+	c := Category{depth: utils.NewDepthWatcher()}
 
-	c.Term = helper.NewElement("term", "", helper.Nop)
-	c.Term.SetOccurence(helper.NewOccurence("term", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Term = utils.NewElement("term", "", utils.Nop)
+	c.Term.SetOccurence(utils.NewOccurence("term", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Scheme = helper.NewElement("scheme", "", IsValidIRI)
-	c.Scheme.SetOccurence(helper.NewOccurence("scheme", helper.UniqueValidator(AttributeDuplicated)))
+	c.Scheme = utils.NewElement("scheme", "", IsValidIRI)
+	c.Scheme.SetOccurence(utils.NewOccurence("scheme", utils.UniqueValidator(AttributeDuplicated)))
 
-	c.Label = helper.NewElement("label", "", helper.Nop)
-	c.Label.SetOccurence(helper.NewOccurence("label", helper.UniqueValidator(AttributeDuplicated)))
+	c.Label = utils.NewElement("label", "", utils.Nop)
+	c.Label.SetOccurence(utils.NewOccurence("label", utils.UniqueValidator(AttributeDuplicated)))
 
 	c.InitCommonAttributes()
 
@@ -50,12 +50,12 @@ func (c *Category) reset() {
 	c.ResetAttr()
 }
 
-func (c *Category) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (c *Category) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if c.depth.IsRoot() {
 		c.reset()
 		for _, attr := range el.Attr {
 			switch attr.Name.Space {
-			case helper.XML_NS:
+			case utils.XML_NS:
 				c.ProcessAttr(attr)
 			case "":
 				switch attr.Name.Local {
@@ -82,22 +82,22 @@ func (c *Category) ProcessStartElement(el helper.StartElement) (helper.Visitor, 
 	return c, nil
 }
 
-func (c *Category) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if c.depth.Up() == helper.RootLevel {
+func (c *Category) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if c.depth.Up() == utils.RootLevel {
 		return c.Parent, c.validate()
 	}
 
 	return c, nil
 }
 
-func (c *Category) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (c *Category) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return c, nil
 }
 
-func (c *Category) validate() helper.ParserError {
+func (c *Category) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElements("category", &error, c.Term, c.Label, c.Scheme)
+	utils.ValidateElements("category", &error, c.Term, c.Label, c.Scheme)
 	c.ValidateCommonAttributes("category", &error)
 
 	c.Extension.Validate(&error)

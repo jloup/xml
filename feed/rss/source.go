@@ -6,23 +6,23 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Source struct {
-	Url     helper.Element
-	Content helper.Element
+	Url     utils.Element
+	Content utils.Element
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewSource() *Source {
-	s := Source{depth: helper.NewDepthWatcher()}
+	s := Source{depth: utils.NewDepthWatcher()}
 
-	s.Url = helper.NewElement("url", "", helper.Nop)
-	s.Url.SetOccurence(helper.NewOccurence("url", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	s.Url = utils.NewElement("url", "", utils.Nop)
+	s.Url.SetOccurence(utils.NewOccurence("url", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
 	return &s
 }
@@ -38,7 +38,7 @@ func (s *Source) reset() {
 	s.Url.Reset()
 }
 
-func (s *Source) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (s *Source) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if s.depth.IsRoot() {
 		s.reset()
 		for _, attr := range el.Attr {
@@ -60,8 +60,8 @@ func (s *Source) ProcessStartElement(el helper.StartElement) (helper.Visitor, he
 	return s, nil
 }
 
-func (s *Source) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if s.depth.Up() == helper.RootLevel {
+func (s *Source) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if s.depth.Up() == utils.RootLevel {
 
 		return s.Parent, s.validate()
 	}
@@ -69,15 +69,15 @@ func (s *Source) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.Pa
 	return s, nil
 }
 
-func (s *Source) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (s *Source) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	s.Content.Value = strings.TrimSpace(string(el))
 	return s, nil
 }
 
-func (s *Source) validate() helper.ParserError {
+func (s *Source) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElements("source", &error, s.Url)
+	utils.ValidateElements("source", &error, s.Url)
 	s.Extension.Validate(&error)
 
 	return error.ErrorObject()

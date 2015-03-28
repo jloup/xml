@@ -5,7 +5,7 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Person struct {
@@ -16,12 +16,12 @@ type Person struct {
 
 	name      string
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewPerson() *Person {
-	p := Person{depth: helper.NewDepthWatcher()}
+	p := Person{depth: utils.NewDepthWatcher()}
 
 	p.Name = NewBasicElement(&p)
 	p.Uri = NewBasicElement(&p)
@@ -33,7 +33,7 @@ func NewPerson() *Person {
 }
 
 func NewPersonExt(manager extension.Manager) *Person {
-	p := Person{depth: helper.NewDepthWatcher()}
+	p := Person{depth: utils.NewDepthWatcher()}
 
 	p.Name = NewBasicElementExt(&p, manager)
 	p.Uri = NewBasicElementExt(&p, manager)
@@ -48,14 +48,14 @@ func NewPersonExt(manager extension.Manager) *Person {
 
 func (p *Person) init() {
 
-	p.Name.Content = helper.NewElement("name", "", helper.Nop)
-	p.Name.Content.SetOccurence(helper.NewOccurence("name", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	p.Name.Content = utils.NewElement("name", "", utils.Nop)
+	p.Name.Content.SetOccurence(utils.NewOccurence("name", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	p.Uri.Content = helper.NewElement("uri", "", IsValidIRI)
-	p.Uri.Content.SetOccurence(helper.NewOccurence("uri", helper.UniqueValidator(AttributeDuplicated)))
+	p.Uri.Content = utils.NewElement("uri", "", IsValidIRI)
+	p.Uri.Content.SetOccurence(utils.NewOccurence("uri", utils.UniqueValidator(AttributeDuplicated)))
 
-	p.Email.Content = helper.NewElement("email", "", helper.Nop)
-	p.Email.Content.SetOccurence(helper.NewOccurence("email", helper.UniqueValidator(AttributeDuplicated)))
+	p.Email.Content = utils.NewElement("email", "", utils.Nop)
+	p.Email.Content.SetOccurence(utils.NewOccurence("email", utils.UniqueValidator(AttributeDuplicated)))
 
 	p.InitCommonAttributes()
 
@@ -68,7 +68,7 @@ func (p *Person) reset() {
 	p.Email.Content.Reset()
 }
 
-func (p *Person) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (p *Person) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if p.depth.IsRoot() {
 		p.reset()
 		p.name = el.Name.Local
@@ -106,8 +106,8 @@ func (p *Person) ProcessStartElement(el helper.StartElement) (helper.Visitor, he
 	return p, nil
 }
 
-func (p *Person) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if p.depth.Up() == helper.RootLevel {
+func (p *Person) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if p.depth.Up() == utils.RootLevel {
 
 		return p.Parent, p.validate()
 	}
@@ -115,15 +115,15 @@ func (p *Person) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.Pa
 	return p, nil
 }
 
-func (p *Person) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (p *Person) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return p, nil
 }
 
-func (p *Person) validate() helper.ParserError {
+func (p *Person) validate() utils.ParserError {
 
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateOccurences(p.name, &error, p.Name.Content.Occurence, p.Uri.Content.Occurence, p.Email.Content.Occurence)
+	utils.ValidateOccurences(p.name, &error, p.Name.Content.Occurence, p.Uri.Content.Occurence, p.Email.Content.Occurence)
 	p.ValidateCommonAttributes(p.name, &error)
 	p.Extension.Validate(&error)
 

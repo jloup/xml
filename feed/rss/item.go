@@ -5,7 +5,7 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Item struct {
@@ -21,9 +21,9 @@ type Item struct {
 	Source      *Source
 
 	Extension  extension.VisitorExtension
-	Parent     helper.Visitor
-	depth      helper.DepthWatcher
-	Occurences helper.OccurenceCollection
+	Parent     utils.Visitor
+	depth      utils.DepthWatcher
+	Occurences utils.OccurenceCollection
 }
 
 func NewItem() *Item {
@@ -38,7 +38,7 @@ func NewItem() *Item {
 		PubDate:     NewDate(),
 		Source:      NewSource(),
 
-		depth: helper.NewDepthWatcher(),
+		depth: utils.NewDepthWatcher(),
 	}
 
 	i.init()
@@ -58,7 +58,7 @@ func NewItemExt(manager extension.Manager) *Item {
 		PubDate:     NewDateExt(manager),
 		Source:      NewSourceExt(manager),
 
-		depth: helper.NewDepthWatcher(),
+		depth: utils.NewDepthWatcher(),
 	}
 
 	i.init()
@@ -69,10 +69,10 @@ func NewItemExt(manager extension.Manager) *Item {
 
 func (i *Item) init() {
 
-	i.Title.Content = helper.NewElement("title", "", helper.Nop)
-	i.Link.Content = helper.NewElement("link", "", helper.Nop)
-	i.Author.Content = helper.NewElement("author", "", helper.Nop)
-	i.Comments.Content = helper.NewElement("comments", "", helper.Nop)
+	i.Title.Content = utils.NewElement("title", "", utils.Nop)
+	i.Link.Content = utils.NewElement("link", "", utils.Nop)
+	i.Author.Content = utils.NewElement("author", "", utils.Nop)
+	i.Comments.Content = utils.NewElement("comments", "", utils.Nop)
 
 	i.Title.Parent = i
 	i.Link.Parent = i
@@ -84,16 +84,16 @@ func (i *Item) init() {
 	i.PubDate.Parent = i
 	i.Source.Parent = i
 
-	i.Occurences = helper.NewOccurenceCollection(
-		helper.NewOccurence("title", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("link", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("description", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("author", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("comments", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("enclosure", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("guid", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("pubdate", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("source", helper.UniqueValidator(AttributeDuplicated)),
+	i.Occurences = utils.NewOccurenceCollection(
+		utils.NewOccurence("title", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("link", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("description", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("author", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("comments", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("enclosure", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("guid", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("pubdate", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("source", utils.UniqueValidator(AttributeDuplicated)),
 	)
 }
 
@@ -101,7 +101,7 @@ func (i *Item) reset() {
 	i.Occurences.Reset()
 }
 
-func (i *Item) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (i *Item) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if i.depth.IsRoot() {
 		i.reset()
 		for _, attr := range el.Attr {
@@ -162,26 +162,26 @@ func (i *Item) ProcessStartElement(el helper.StartElement) (helper.Visitor, help
 	return i, nil
 }
 
-func (i *Item) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if i.depth.Up() == helper.RootLevel {
+func (i *Item) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if i.depth.Up() == utils.RootLevel {
 		return i.Parent, i.validate()
 	}
 
 	return i, nil
 }
 
-func (i *Item) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (i *Item) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return i, nil
 }
 
-func (i *Item) validate() helper.ParserError {
+func (i *Item) validate() utils.ParserError {
 	err := errors.NewErrorAggregator()
 
-	helper.ValidateOccurenceCollection("item", &err, i.Occurences)
+	utils.ValidateOccurenceCollection("item", &err, i.Occurences)
 	i.Extension.Validate(&err)
 
 	if i.Occurences.Count("description") == 0 && i.Occurences.Count("title") == 0 {
-		err.NewError(helper.NewError(MissingAttribute, "item should have at least a title or a description"))
+		err.NewError(utils.NewError(MissingAttribute, "item should have at least a title or a description"))
 	}
 
 	return err.ErrorObject()

@@ -5,38 +5,38 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Cloud struct {
-	Domain            helper.Element
-	Port              helper.Element
-	Path              helper.Element
-	RegisterProcedure helper.Element
-	Protocol          helper.Element
+	Domain            utils.Element
+	Port              utils.Element
+	Path              utils.Element
+	RegisterProcedure utils.Element
+	Protocol          utils.Element
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewCloud() *Cloud {
-	c := Cloud{depth: helper.NewDepthWatcher()}
+	c := Cloud{depth: utils.NewDepthWatcher()}
 
-	c.Domain = helper.NewElement("domain", "", helper.Nop)
-	c.Domain.SetOccurence(helper.NewOccurence("domain", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Domain = utils.NewElement("domain", "", utils.Nop)
+	c.Domain.SetOccurence(utils.NewOccurence("domain", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Port = helper.NewElement("port", "", helper.Nop)
-	c.Port.SetOccurence(helper.NewOccurence("port", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Port = utils.NewElement("port", "", utils.Nop)
+	c.Port.SetOccurence(utils.NewOccurence("port", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Path = helper.NewElement("path", "", helper.Nop)
-	c.Path.SetOccurence(helper.NewOccurence("path", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Path = utils.NewElement("path", "", utils.Nop)
+	c.Path.SetOccurence(utils.NewOccurence("path", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.RegisterProcedure = helper.NewElement("registerProcedure", "", helper.Nop)
-	c.RegisterProcedure.SetOccurence(helper.NewOccurence("registerProcedure", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.RegisterProcedure = utils.NewElement("registerProcedure", "", utils.Nop)
+	c.RegisterProcedure.SetOccurence(utils.NewOccurence("registerProcedure", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Protocol = helper.NewElement("protocol", "", helper.Nop)
-	c.Protocol.SetOccurence(helper.NewOccurence("protocol", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Protocol = utils.NewElement("protocol", "", utils.Nop)
+	c.Protocol.SetOccurence(utils.NewOccurence("protocol", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
 	return &c
 }
@@ -57,7 +57,7 @@ func (c *Cloud) reset() {
 	c.Protocol.Reset()
 }
 
-func (c *Cloud) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (c *Cloud) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if c.depth.IsRoot() {
 		c.reset()
 		for _, attr := range el.Attr {
@@ -95,22 +95,22 @@ func (c *Cloud) ProcessStartElement(el helper.StartElement) (helper.Visitor, hel
 	return c, nil
 }
 
-func (c *Cloud) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if c.depth.Up() == helper.RootLevel {
+func (c *Cloud) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if c.depth.Up() == utils.RootLevel {
 		return c.Parent, c.validate()
 	}
 
 	return c, nil
 }
 
-func (c *Cloud) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (c *Cloud) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return c, nil
 }
 
-func (c *Cloud) validate() helper.ParserError {
+func (c *Cloud) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElements("cloud", &error, c.Domain, c.Port, c.Path, c.RegisterProcedure, c.Protocol)
+	utils.ValidateElements("cloud", &error, c.Domain, c.Port, c.Path, c.RegisterProcedure, c.Protocol)
 	c.Extension.Validate(&error)
 
 	return error.ErrorObject()

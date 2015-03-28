@@ -3,7 +3,7 @@ package rss
 import (
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 	"bytes"
 	"encoding/xml"
 	"strings"
@@ -15,12 +15,12 @@ type UnescapedContent struct {
 
 	Encoder   *xml.Encoder
 	Extension extension.VisitorExtension
-	depth     helper.DepthWatcher
-	Parent    helper.Visitor
+	depth     utils.DepthWatcher
+	Parent    utils.Visitor
 }
 
 func NewUnescapedContent() *UnescapedContent {
-	u := UnescapedContent{depth: helper.NewDepthWatcher()}
+	u := UnescapedContent{depth: utils.NewDepthWatcher()}
 	u.Content = &bytes.Buffer{}
 	u.Encoder = xml.NewEncoder(u.Content)
 	return &u
@@ -36,7 +36,7 @@ func NewUnescapedContentExt(manager extension.Manager) *UnescapedContent {
 func (u *UnescapedContent) EncodeXHTMLToken(t xml.Token) error {
 	var err error
 	switch t := t.(type) {
-	case helper.StartElement:
+	case utils.StartElement:
 		err = u.Encoder.EncodeToken(*t.StartElement)
 	case xml.EndElement:
 		err = u.Encoder.EncodeToken(t)
@@ -45,7 +45,7 @@ func (u *UnescapedContent) EncodeXHTMLToken(t xml.Token) error {
 	return err
 }
 
-func (u *UnescapedContent) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (u *UnescapedContent) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if u.depth.IsRoot() {
 		u.name = el.Name
 		u.Extension = extension.InitExtension(u.name.Local, u.Extension.Manager)
@@ -60,15 +60,15 @@ func (u *UnescapedContent) ProcessStartElement(el helper.StartElement) (helper.V
 	u.depth.Down()
 
 	if error := u.EncodeXHTMLToken(el); error != nil {
-		err.NewError(helper.NewError(XHTMLEncodeToStringError, "cannot encode XHTML"))
+		err.NewError(utils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML"))
 	}
 
 	return u, err.ErrorObject()
 }
 
-func (u *UnescapedContent) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
+func (u *UnescapedContent) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
 	level := u.depth.Up()
-	if level == helper.ParentLevel {
+	if level == utils.ParentLevel {
 		ferr := u.flush()
 		if ferr != nil {
 			return u.Parent, ferr
@@ -77,27 +77,27 @@ func (u *UnescapedContent) ProcessEndElement(el xml.EndElement) (helper.Visitor,
 	}
 
 	if err := u.EncodeXHTMLToken(el); err != nil {
-		return u, helper.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
+		return u, utils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
 	}
 
 	return u, nil
 }
 
-func (u *UnescapedContent) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (u *UnescapedContent) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	if len(strings.Fields(string(el))) > 0 {
 		if ferr := u.flush(); ferr != nil {
 			return u, ferr
 		}
 
 		if _, err := u.Content.Write(el); err != nil {
-			return u, helper.NewError(CannotFlush, "cannot flush content")
+			return u, utils.NewError(CannotFlush, "cannot flush content")
 		}
 	}
 
 	return u, nil
 }
 
-func (u *UnescapedContent) Validate() helper.ParserError {
+func (u *UnescapedContent) Validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
 	u.Extension.Validate(&error)
@@ -105,9 +105,9 @@ func (u *UnescapedContent) Validate() helper.ParserError {
 	return error.ErrorObject()
 }
 
-func (u *UnescapedContent) flush() helper.ParserError {
+func (u *UnescapedContent) flush() utils.ParserError {
 	if err := u.Encoder.Flush(); err != nil {
-		return helper.NewError(CannotFlush, "cannot flush content")
+		return utils.NewError(CannotFlush, "cannot flush content")
 	}
 	return nil
 }

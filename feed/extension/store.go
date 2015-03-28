@@ -4,12 +4,12 @@ import (
 	"encoding/xml"
 
 	"github.com/JLoup/errors"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type storeInterface interface {
 	String() string
-	Validate() helper.ParserError
+	Validate() utils.ParserError
 }
 
 type eStore struct {
@@ -19,7 +19,7 @@ type eStore struct {
 
 type Store struct {
 	stores []eStore
-	Occ    helper.OccurenceCollection
+	Occ    utils.OccurenceCollection
 }
 
 func (s *Store) find(name xml.Name) int {

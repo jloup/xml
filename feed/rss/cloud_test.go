@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -20,11 +20,11 @@ func NewTestCloud(domain, port, path, registerProcedure, protocol string) *Cloud
 
 type testCloud struct {
 	XML           string
-	ExpectedError helper.ParserError
+	ExpectedError utils.ParserError
 	ExpectedCloud *Cloud
 }
 
-func testCloudValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testCloudValidator(actual utils.Visitor, expected utils.Visitor) error {
 	c1 := actual.(*Cloud)
 	c2 := expected.(*Cloud)
 
@@ -51,12 +51,12 @@ func testCloudValidator(actual helper.Visitor, expected helper.Visitor) error {
 	return nil
 }
 
-func testCloudConstructor() helper.Visitor {
+func testCloudConstructor() utils.Visitor {
 	return NewCloud()
 }
 
-func _TestCloudToTestVisitor(t testCloud) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestCloudToTestVisitor(t testCloud) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedCloud,
@@ -78,23 +78,23 @@ func TestCloudBasic(t *testing.T) {
 			NewTestCloud("rpc.sys.com", "80", "/RPC2", "myCloud.rssPleaseNotify", "xml-rpc"),
 		},
 		{`<cloud port="80" path="/RPC2" registerProcedure="myCloud.rssPleaseNotify" protocol="xml-rpc" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestCloud("", "80", "/RPC2", "myCloud.rssPleaseNotify", "xml-rpc"),
 		},
 		{`<cloud domain="rpc.sys.com" path="/RPC2" registerProcedure="myCloud.rssPleaseNotify" protocol="xml-rpc" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestCloud("rpc.sys.com", "", "/RPC2", "myCloud.rssPleaseNotify", "xml-rpc"),
 		},
 		{`<cloud domain="rpc.sys.com" port="80" registerProcedure="myCloud.rssPleaseNotify" protocol="xml-rpc" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestCloud("rpc.sys.com", "80", "", "myCloud.rssPleaseNotify", "xml-rpc"),
 		},
 		{`<cloud domain="rpc.sys.com" port="80" path="/RPC2" protocol="xml-rpc" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestCloud("rpc.sys.com", "80", "/RPC2", "", "xml-rpc"),
 		},
 		{`<cloud domain="rpc.sys.com" port="80" path="/RPC2" registerProcedure="myCloud.rssPleaseNotify" />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestCloud("rpc.sys.com", "80", "/RPC2", "myCloud.rssPleaseNotify", ""),
 		},
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/atom"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 var _count = xml.Name{Space: NS, Local: "count"}
@@ -16,15 +16,15 @@ type Count struct {
 	extension.BasicAttr
 }
 
-func (c *Count) Validate() helper.ParserError {
+func (c *Count) Validate() utils.ParserError {
 	errAgg := errors.NewErrorAggregator()
 	link, ok := c.Parent.(*atom.Link)
 	if !ok {
-		errAgg.NewError(helper.NewError(NotInLinkElement, "count attr should be placed in link element"))
+		errAgg.NewError(utils.NewError(NotInLinkElement, "count attr should be placed in link element"))
 
 	} else {
 		if link.Rel.String() != "replies" {
-			errAgg.NewError(helper.NewError(LinkNotReplies, "link element should avec a 'replies' rel for this extension"))
+			errAgg.NewError(utils.NewError(LinkNotReplies, "link element should avec a 'replies' rel for this extension"))
 		}
 	}
 	if err := c.Validator(c.Name().Local, c.Content); err != nil {
@@ -35,7 +35,7 @@ func (c *Count) Validate() helper.ParserError {
 }
 
 func newCountAttr() extension.Attr {
-	c := Count{extension.NewBasicAttr(_count, helper.IsValidNumber(atom.NotPositiveNumber))}
+	c := Count{extension.NewBasicAttr(_count, utils.IsValidNumber(atom.NotPositiveNumber))}
 
 	return &c
 }
@@ -44,15 +44,15 @@ type Updated struct {
 	extension.BasicAttr
 }
 
-func (u *Updated) Validate() helper.ParserError {
+func (u *Updated) Validate() utils.ParserError {
 	errAgg := errors.NewErrorAggregator()
 	link, ok := u.Parent.(*atom.Link)
 	if !ok {
-		errAgg.NewError(helper.NewError(NotInLinkElement, "updated attr should be placed in link element"))
+		errAgg.NewError(utils.NewError(NotInLinkElement, "updated attr should be placed in link element"))
 
 	} else {
 		if link.Rel.String() != "replies" {
-			errAgg.NewError(helper.NewError(LinkNotReplies, "link element should avec a 'replies' rel for this extension"))
+			errAgg.NewError(utils.NewError(LinkNotReplies, "link element should avec a 'replies' rel for this extension"))
 		}
 	}
 
@@ -60,6 +60,6 @@ func (u *Updated) Validate() helper.ParserError {
 }
 
 func newUpdatedAttr() extension.Attr {
-	u := Updated{extension.NewBasicAttr(_updated, helper.Nop)}
+	u := Updated{extension.NewBasicAttr(_updated, utils.Nop)}
 	return &u
 }

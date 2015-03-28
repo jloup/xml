@@ -6,7 +6,7 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Source struct {
@@ -25,9 +25,9 @@ type Source struct {
 	Updated      *Date
 
 	Extension  extension.VisitorExtension
-	Occurences helper.OccurenceCollection
-	depth      helper.DepthWatcher
-	Parent     helper.Visitor
+	Occurences utils.OccurenceCollection
+	depth      utils.DepthWatcher
+	Parent     utils.Visitor
 }
 
 func NewSource() *Source {
@@ -41,7 +41,7 @@ func NewSource() *Source {
 		Title:     NewTextConstruct(),
 		Updated:   NewDate(),
 
-		depth: helper.NewDepthWatcher(),
+		depth: utils.NewDepthWatcher(),
 	}
 
 	s.init()
@@ -60,7 +60,7 @@ func NewSourceExt(manager extension.Manager) *Source {
 		Title:     NewTextConstructExt(manager),
 		Updated:   NewDateExt(manager),
 
-		depth: helper.NewDepthWatcher(),
+		depth: utils.NewDepthWatcher(),
 	}
 
 	s.init()
@@ -79,15 +79,15 @@ func (s *Source) init() {
 	s.Title.Parent = s
 	s.Updated.Parent = s
 
-	s.Occurences = helper.NewOccurenceCollection(
-		helper.NewOccurence("generator", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("icon", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("logo", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("id", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
-		helper.NewOccurence("rights", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("subtitle", helper.UniqueValidator(AttributeDuplicated)),
-		helper.NewOccurence("title", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
-		helper.NewOccurence("updated", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
+	s.Occurences = utils.NewOccurenceCollection(
+		utils.NewOccurence("generator", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("icon", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("logo", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("id", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
+		utils.NewOccurence("rights", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("subtitle", utils.UniqueValidator(AttributeDuplicated)),
+		utils.NewOccurence("title", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
+		utils.NewOccurence("updated", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
 	)
 
 	s.InitCommonAttributes()
@@ -98,7 +98,7 @@ func (s *Source) reset() {
 	s.Occurences.Reset()
 }
 
-func (s *Source) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (s *Source) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if s.depth.IsRoot() {
 		s.reset()
 		for _, attr := range el.Attr {
@@ -171,7 +171,7 @@ func (s *Source) ProcessStartElement(el helper.StartElement) (helper.Visitor, he
 
 		case "entry":
 			s.depth.Down()
-			return s, helper.NewError(AttributeForbidden, "source should not contain entry elements")
+			return s, utils.NewError(AttributeForbidden, "source should not contain entry elements")
 		}
 	default:
 		return s.Extension.ProcessElement(el, s)
@@ -181,15 +181,15 @@ func (s *Source) ProcessStartElement(el helper.StartElement) (helper.Visitor, he
 	return s, nil
 }
 
-func (s *Source) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if s.depth.Up() == helper.RootLevel {
+func (s *Source) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if s.depth.Up() == utils.RootLevel {
 		return s.Parent, s.validate()
 	}
 
 	return s, nil
 }
 
-func (s *Source) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (s *Source) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return s, nil
 }
 
@@ -197,10 +197,10 @@ func (s *Source) hasAuthor() bool {
 	return len(s.Authors) > 0
 }
 
-func (s *Source) validate() helper.ParserError {
+func (s *Source) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateOccurenceCollection("source", &error, s.Occurences)
+	utils.ValidateOccurenceCollection("source", &error, s.Occurences)
 	s.Extension.Validate(&error)
 	s.validateLinks(&error)
 	s.ValidateCommonAttributes("source", &error)
@@ -218,7 +218,7 @@ func (s *Source) validateLinks(err *errors.ErrorAggregator) {
 
 			for _, comb := range combinations {
 				if s == comb {
-					err.NewError(helper.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
+					err.NewError(utils.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
 					unique = false
 				}
 			}

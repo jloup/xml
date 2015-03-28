@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestFeed(
@@ -49,11 +49,11 @@ func FeedWithBaseLang(f *Feed, lang, base string) *Feed {
 
 type testFeed struct {
 	XML           string
-	ExpectedError helper.ParserError
+	ExpectedError utils.ParserError
 	ExpectedFeed  *Feed
 }
 
-func testFeedValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testFeedValidator(actual utils.Visitor, expected utils.Visitor) error {
 	f1 := actual.(*Feed)
 	f2 := expected.(*Feed)
 
@@ -151,12 +151,12 @@ func testFeedValidator(actual helper.Visitor, expected helper.Visitor) error {
 	return nil
 }
 
-func testFeedConstructor() helper.Visitor {
+func testFeedConstructor() utils.Visitor {
 	return NewFeed()
 }
 
-func _TestFeedToTestVisitor(t testFeed) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestFeedToTestVisitor(t testFeed) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedFeed,
@@ -387,7 +387,7 @@ func TestFeedBasic(t *testing.T) {
        <summary>Some text.</summary>
     </entry>
   </feed>`,
-			helper.NewError(MissingAuthor, ""),
+			utils.NewError(MissingAuthor, ""),
 			NewTestFeed(
 				nil,
 				nil,
@@ -435,7 +435,7 @@ func TestFeedBasic(t *testing.T) {
     <generator uri="http://www.example.com/" version="1.0">Example Toolkit</generator>
     <generator uri="http://www.example2.com/" version="1.0">Example Toolkit</generator>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -466,7 +466,7 @@ func TestFeedBasic(t *testing.T) {
     <id>tag:example.org,2003:3</id>
     <generator uri="http://www.example2.com/" version="1.0">Example Toolkit</generator>
   </feed>`,
-			helper.NewError(MissingSelfLink, ""),
+			utils.NewError(MissingSelfLink, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -498,7 +498,7 @@ func TestFeedBasic(t *testing.T) {
     <icon>https://www.yo.com</icon>
     <icon>https://www.yo2.com</icon>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -528,7 +528,7 @@ func TestFeedBasic(t *testing.T) {
     </author>
     <link rel="self" type="application/atom+xml" href="http://example.org/feed.atom"/>
   </feed>`,
-			helper.NewError(MissingId, ""),
+			utils.NewError(MissingId, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -560,7 +560,7 @@ func TestFeedBasic(t *testing.T) {
     <id>tag:example.org,2003:3</id>
     <id>tag:example.org,2010:3</id>
   </feed>`,
-			helper.NewError(IdDuplicated, ""),
+			utils.NewError(IdDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -593,7 +593,7 @@ func TestFeedBasic(t *testing.T) {
     <link type="application/atom+xml" hreflang="fr" href="http://example.org/content"/>
    <id>tag:example.org,2003:3</id>
   </feed>`,
-			helper.NewError(LinkAlternateDuplicated, ""),
+			utils.NewError(LinkAlternateDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -663,7 +663,7 @@ func TestFeedBasic(t *testing.T) {
     <logo>https://www.yo.com</logo>
     <logo>https://www.yo2.com</logo>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -697,7 +697,7 @@ func TestFeedBasic(t *testing.T) {
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
     <rights>Copyright (c) 2010, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -731,7 +731,7 @@ func TestFeedBasic(t *testing.T) {
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
     <rights>Copyright (c) 2010, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -765,7 +765,7 @@ func TestFeedBasic(t *testing.T) {
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
     <rights>Copyright (c) 2010, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -799,7 +799,7 @@ func TestFeedBasic(t *testing.T) {
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
     <rights>Copyright (c) 2010, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -833,7 +833,7 @@ func TestFeedBasic(t *testing.T) {
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
     <rights>Copyright (c) 2010, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -868,7 +868,7 @@ func TestFeedBasic(t *testing.T) {
      href="http://example.org/feed.atom"/>
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -903,7 +903,7 @@ func TestFeedBasic(t *testing.T) {
      href="http://example.org/feed.atom"/>
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(TitleDuplicated, ""),
+			utils.NewError(TitleDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -936,7 +936,7 @@ func TestFeedBasic(t *testing.T) {
      href="http://example.org/feed.atom"/>
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(MissingTitle, ""),
+			utils.NewError(MissingTitle, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -969,7 +969,7 @@ func TestFeedBasic(t *testing.T) {
      href="http://example.org/feed.atom"/>
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(MissingDate, ""),
+			utils.NewError(MissingDate, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -1004,7 +1004,7 @@ func TestFeedBasic(t *testing.T) {
      href="http://example.org/feed.atom"/>
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(AttributeDuplicated, ""),
+			utils.NewError(AttributeDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),
@@ -1035,7 +1035,7 @@ func TestFeedBasic(t *testing.T) {
      href="http://example.org/feed.atom"/>
     <rights>Copyright (c) 2003, Mark Pilgrim</rights>
   </feed>`,
-			helper.NewError(MissingAuthor, ""),
+			utils.NewError(MissingAuthor, ""),
 			NewTestFeed(
 				nil,
 				nil,
@@ -1078,7 +1078,7 @@ func TestFeedBasic(t *testing.T) {
        <summary>Some text.</summary>
     </entry>
   </feed>`,
-			helper.NewError(EntryWithIdAndDateDuplicated, ""),
+			utils.NewError(EntryWithIdAndDateDuplicated, ""),
 			NewTestFeed(
 				[]*Person{
 					NewTestPerson("Mark Pilgrim", "", ""),

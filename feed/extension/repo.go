@@ -7,7 +7,7 @@ import (
 
 	"github.com/JLoup/flag"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func xmlNameToString(name xml.Name) string {
@@ -27,7 +27,7 @@ type eAttr struct {
 // base element for Manager
 type Repository struct {
 	name     string
-	Occ      helper.OccurenceCollection
+	Occ      utils.OccurenceCollection
 	elements []eElement
 	attrs    []eAttr
 }
@@ -48,7 +48,7 @@ func (r *Repository) AddAttr(name xml.Name, constructor AttrConstructor, attrDup
 	}
 
 	r.attrs = append(r.attrs, eAttr{name: name, constructor: constructor})
-	r.Occ.AddOccurence(helper.NewOccurence(xmlNameToString(name), helper.UniqueValidator(attrDuplicatedFlag)))
+	r.Occ.AddOccurence(utils.NewOccurence(xmlNameToString(name), utils.UniqueValidator(attrDuplicatedFlag)))
 
 	return nil
 }
@@ -70,14 +70,14 @@ func (r *Repository) findElement(name xml.Name) int {
 	return -1
 }
 
-func (r *Repository) AddElement(name xml.Name, constructor ElementConstructor, occValidator helper.OccurenceValidator) error {
+func (r *Repository) AddElement(name xml.Name, constructor ElementConstructor, occValidator utils.OccurenceValidator) error {
 
 	if index := r.findElement(name); index != -1 {
 		return errors.New("an extension of this name already exists")
 	}
 
 	r.elements = append(r.elements, eElement{name: name, constructor: constructor})
-	r.Occ.AddOccurence(helper.NewOccurence(xmlNameToString(name), occValidator))
+	r.Occ.AddOccurence(utils.NewOccurence(xmlNameToString(name), occValidator))
 
 	return nil
 }
@@ -128,7 +128,7 @@ func (m *Manager) AddAttrExtension(tagName string, name xml.Name, constructor At
 	return m.tags[index].AddAttr(name, constructor, attrDuplicatedFlag)
 }
 
-func (m *Manager) AddElementExtension(tagName string, name xml.Name, constructor ElementConstructor, occValidator helper.OccurenceValidator) error {
+func (m *Manager) AddElementExtension(tagName string, name xml.Name, constructor ElementConstructor, occValidator utils.OccurenceValidator) error {
 	index := m.findAndCreate(tagName)
 	return m.tags[index].AddElement(name, constructor, occValidator)
 }

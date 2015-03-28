@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestPerson(name, uri, email string) *Person {
@@ -26,11 +26,11 @@ func PersonWithBaseLang(p *Person, lang, base string) *Person {
 
 type testPerson struct {
 	XML            string
-	ExpectedError  helper.ParserError
+	ExpectedError  utils.ParserError
 	ExpectedPerson *Person
 }
 
-func testPersonValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testPersonValidator(actual utils.Visitor, expected utils.Visitor) error {
 	p1 := actual.(*Person)
 	p2 := expected.(*Person)
 
@@ -53,12 +53,12 @@ func testPersonValidator(actual helper.Visitor, expected helper.Visitor) error {
 	return nil
 }
 
-func testPersonConstructor() helper.Visitor {
+func testPersonConstructor() utils.Visitor {
 	return NewPerson()
 }
 
-func _TestPersonToTestVisitor(t testPerson) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func _TestPersonToTestVisitor(t testPerson) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedPerson,
@@ -94,7 +94,7 @@ var testdata = []testPerson{
      <uri>http://yo.com</uri>
      <email>tim.bray@machin.com</email>
     </author>`,
-		helper.NewError(MissingAttribute, ""),
+		utils.NewError(MissingAttribute, ""),
 		NewTestPerson("", "http://yo.com", "tim.bray@machin.com"),
 	},
 	{`
@@ -103,7 +103,7 @@ var testdata = []testPerson{
      <name>Tim Bray</name>
      <email>tim.bray@machin.com</email>
     </author>`,
-		helper.NewError(AttributeDuplicated, ""),
+		utils.NewError(AttributeDuplicated, ""),
 		NewTestPerson("Tim Bray", "", "tim.bray@machin.com"),
 	},
 	{`
@@ -111,7 +111,7 @@ var testdata = []testPerson{
      <name>Tim Bray</name>
      <email><a>tim.bray@machin.com</a></email>
     </author>`,
-		helper.NewError(LeafElementHasChild, ""),
+		utils.NewError(LeafElementHasChild, ""),
 		NewTestPerson("Tim Bray", "", "tim.bray@machin.com"),
 	},
 	{`
@@ -129,13 +129,13 @@ var testdata = []testPerson{
      <email>tim.bray@machin.com</email>
      <uri>http://www%%.yo.com</uri>
     </author>`,
-		helper.NewError(IriNotValid, ""),
+		utils.NewError(IriNotValid, ""),
 		NewTestPerson("Tim Bray", "http://www%%.yo.com", "tim.bray@machin.com"),
 	},
 	{`
     <author xmlns='http://www.w3.org/2005/Atom'>
     </author>`,
-		helper.NewError(MissingAttribute, ""),
+		utils.NewError(MissingAttribute, ""),
 		NewTestPerson("", "", ""),
 	},
 }

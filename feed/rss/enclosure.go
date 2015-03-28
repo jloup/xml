@@ -5,30 +5,30 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Enclosure struct {
-	Url    helper.Element
-	Length helper.Element
-	Type   helper.Element
+	Url    utils.Element
+	Length utils.Element
+	Type   utils.Element
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewEnclosure() *Enclosure {
-	e := Enclosure{depth: helper.NewDepthWatcher()}
+	e := Enclosure{depth: utils.NewDepthWatcher()}
 
-	e.Url = helper.NewElement("url", "", helper.Nop)
-	e.Url.SetOccurence(helper.NewOccurence("url", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	e.Url = utils.NewElement("url", "", utils.Nop)
+	e.Url.SetOccurence(utils.NewOccurence("url", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	e.Length = helper.NewElement("length", "", helper.Nop)
-	e.Length.SetOccurence(helper.NewOccurence("length", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	e.Length = utils.NewElement("length", "", utils.Nop)
+	e.Length.SetOccurence(utils.NewOccurence("length", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	e.Type = helper.NewElement("type", "", helper.Nop)
-	e.Type.SetOccurence(helper.NewOccurence("type", helper.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	e.Type = utils.NewElement("type", "", utils.Nop)
+	e.Type.SetOccurence(utils.NewOccurence("type", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
 	return &e
 }
@@ -46,7 +46,7 @@ func (e *Enclosure) reset() {
 	e.Type.Reset()
 }
 
-func (e *Enclosure) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (e *Enclosure) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if e.depth.IsRoot() {
 		e.reset()
 		for _, attr := range el.Attr {
@@ -76,8 +76,8 @@ func (e *Enclosure) ProcessStartElement(el helper.StartElement) (helper.Visitor,
 	return e, nil
 }
 
-func (e *Enclosure) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if e.depth.Up() == helper.RootLevel {
+func (e *Enclosure) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if e.depth.Up() == utils.RootLevel {
 
 		return e.Parent, e.validate()
 	}
@@ -85,14 +85,14 @@ func (e *Enclosure) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper
 	return e, nil
 }
 
-func (e *Enclosure) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (e *Enclosure) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	return e, nil
 }
 
-func (e *Enclosure) validate() helper.ParserError {
+func (e *Enclosure) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElements("enclosure", &error, e.Url, e.Length, e.Type)
+	utils.ValidateElements("enclosure", &error, e.Url, e.Length, e.Type)
 	e.Extension.Validate(&error)
 
 	return error.ErrorObject()

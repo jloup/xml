@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func ValidateBaseLang(name, base, lang, eBase, eLang string) error {
@@ -37,11 +37,11 @@ func CategoryWithBaseLang(c *Category, lang, base string) *Category {
 
 type testCategory struct {
 	XML              string
-	ExpectedError    helper.ParserError
+	ExpectedError    utils.ParserError
 	ExpectedCategory *Category
 }
 
-func testCategoryValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testCategoryValidator(actual utils.Visitor, expected utils.Visitor) error {
 	c1 := actual.(*Category)
 	c2 := expected.(*Category)
 
@@ -64,12 +64,12 @@ func testCategoryValidator(actual helper.Visitor, expected helper.Visitor) error
 	return nil
 }
 
-func testCategoryConstructor() helper.Visitor {
+func testCategoryConstructor() utils.Visitor {
 	return NewCategory()
 }
 
-func testCategoryToTestVisitor(t testCategory) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func testCategoryToTestVisitor(t testCategory) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedCategory,
@@ -97,7 +97,7 @@ func TestCategoryBasic(t *testing.T) {
 			NewTestCategory("https://www.yo.com", "music", ""),
 		},
 		{`<category scheme='https://www.tbray.org/ongoing/What/' />`,
-			helper.NewError(MissingAttribute, ""),
+			utils.NewError(MissingAttribute, ""),
 			NewTestCategory("https://www.tbray.org/ongoing/What/", "", ""),
 		},
 		{`<category term="music" label='house' />`,
@@ -105,7 +105,7 @@ func TestCategoryBasic(t *testing.T) {
 			NewTestCategory("", "music", "house"),
 		},
 		{`<category term="music" label='house' scheme='http://www.%scheme.com'/>`,
-			helper.NewError(IriNotValid, ""),
+			utils.NewError(IriNotValid, ""),
 			NewTestCategory("http://www.%scheme.com", "music", "house"),
 		},
 	}

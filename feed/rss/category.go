@@ -6,23 +6,23 @@ import (
 
 	"github.com/JLoup/errors"
 	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 type Category struct {
-	Domain  helper.Element
-	Content helper.Element
+	Domain  utils.Element
+	Content utils.Element
 
 	Extension extension.VisitorExtension
-	Parent    helper.Visitor
-	depth     helper.DepthWatcher
+	Parent    utils.Visitor
+	depth     utils.DepthWatcher
 }
 
 func NewCategory() *Category {
-	c := Category{depth: helper.NewDepthWatcher()}
+	c := Category{depth: utils.NewDepthWatcher()}
 
-	c.Domain = helper.NewElement("domain", "", helper.Nop)
-	c.Domain.SetOccurence(helper.NewOccurence("domain", helper.UniqueValidator(AttributeDuplicated)))
+	c.Domain = utils.NewElement("domain", "", utils.Nop)
+	c.Domain.SetOccurence(utils.NewOccurence("domain", utils.UniqueValidator(AttributeDuplicated)))
 
 	return &c
 }
@@ -38,7 +38,7 @@ func (c *Category) reset() {
 	c.Domain.Reset()
 }
 
-func (c *Category) ProcessStartElement(el helper.StartElement) (helper.Visitor, helper.ParserError) {
+func (c *Category) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
 	if c.depth.IsRoot() {
 		c.reset()
 		for _, attr := range el.Attr {
@@ -60,8 +60,8 @@ func (c *Category) ProcessStartElement(el helper.StartElement) (helper.Visitor, 
 	return c, nil
 }
 
-func (c *Category) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.ParserError) {
-	if c.depth.Up() == helper.RootLevel {
+func (c *Category) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+	if c.depth.Up() == utils.RootLevel {
 
 		return c.Parent, c.validate()
 	}
@@ -69,15 +69,15 @@ func (c *Category) ProcessEndElement(el xml.EndElement) (helper.Visitor, helper.
 	return c, nil
 }
 
-func (c *Category) ProcessCharData(el xml.CharData) (helper.Visitor, helper.ParserError) {
+func (c *Category) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
 	c.Content.Value = strings.TrimSpace(string(el))
 	return c, nil
 }
 
-func (c *Category) validate() helper.ParserError {
+func (c *Category) validate() utils.ParserError {
 	error := errors.NewErrorAggregator()
 
-	helper.ValidateElements("category", &error, c.Domain)
+	utils.ValidateElements("category", &error, c.Domain)
 	c.Extension.Validate(&error)
 
 	return error.ErrorObject()

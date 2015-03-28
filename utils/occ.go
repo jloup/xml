@@ -1,4 +1,4 @@
-package helper
+package utils
 
 type OccurenceValidator func(o *Occurence) ParserError
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/helper"
+	"github.com/JLoup/xml/utils"
 )
 
 func NewTestIcon(iri string) *Icon {
@@ -23,11 +23,11 @@ func IconWithBaseLang(i *Icon, lang, base string) *Icon {
 
 type testIcon struct {
 	XML           string
-	ExpectedError helper.ParserError
+	ExpectedError utils.ParserError
 	ExpectedIcon  *Icon
 }
 
-func testIconValidator(actual helper.Visitor, expected helper.Visitor) error {
+func testIconValidator(actual utils.Visitor, expected utils.Visitor) error {
 	i1 := actual.(*Icon)
 	i2 := expected.(*Icon)
 
@@ -41,12 +41,12 @@ func testIconValidator(actual helper.Visitor, expected helper.Visitor) error {
 
 	return nil
 }
-func testIconConstructor() helper.Visitor {
+func testIconConstructor() utils.Visitor {
 	return NewIcon()
 }
 
-func testIconToTestVisitor(t testIcon) helper.TestVisitor {
-	testVisitor := helper.TestVisitor{
+func testIconToTestVisitor(t testIcon) utils.TestVisitor {
+	testVisitor := utils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedIcon,
@@ -73,7 +73,7 @@ func TestIconBasic(t *testing.T) {
 			NewTestIcon("https://www.yo.com"),
 		},
 		{`<icon>https://www.%yo.com</icon>`,
-			helper.NewError(IriNotValid, ""),
+			utils.NewError(IriNotValid, ""),
 			NewTestIcon("https://www.%yo.com"),
 		},
 	}

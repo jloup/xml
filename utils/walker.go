@@ -1,5 +1,5 @@
-// package helper provides tools to help walking, processing and validating XML 1.0 documents
-package helper
+// package utils provides tools to help walking, processing and validating XML 1.0 documents
+package utils
 
 import (
 	"bytes"
