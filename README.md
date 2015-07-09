@@ -1,5 +1,5 @@
 ## Feed Parser (RSS, Atom)
-
+[![GoDoc](https://godoc.org/github.com/jloup/xml/feed?status.svg)](https://godoc.org/github.com/jloup/xml/feed)
 Package feed implements a flexible and efficient RSS/Atom parser. 
 
 If you just want some bytes to be quickly parsed into an object without care about underlying feed type, you can start with this: [Simple Use](#simple)
