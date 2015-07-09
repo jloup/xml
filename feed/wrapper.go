@@ -3,10 +3,10 @@ package feed
 import (
 	"encoding/xml"
 
-	"github.com/JLoup/xml/feed/atom"
-	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/feed/rss"
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/feed/atom"
+	"github.com/jloup/xml/feed/extension"
+	"github.com/jloup/xml/feed/rss"
+	"github.com/jloup/xml/utils"
 )
 
 type wrapper struct {

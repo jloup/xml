@@ -1,8 +1,8 @@
 package atom
 
 import (
-	"github.com/JLoup/xml/utils"
-	"github.com/JLoup/flag"
+	"github.com/jloup/xml/utils"
+	"github.com/jloup/flag"
 )
 
 var (

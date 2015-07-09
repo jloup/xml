@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"github.com/JLoup/errors"
-	"github.com/JLoup/flag"
+	"github.com/jloup/errors"
+	"github.com/jloup/flag"
 )
 
 const (

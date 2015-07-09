@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/JLoup/flag"
+	"github.com/jloup/flag"
 
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 )
 
 func xmlNameToString(name xml.Name) string {

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 )
 
 func NewTestDate(date string) *Date {

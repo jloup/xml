@@ -3,7 +3,7 @@ package atom
 import (
 	"fmt"
 
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 )
 
 var (

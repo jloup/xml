@@ -3,9 +3,9 @@ package thr
 import (
 	"encoding/xml"
 
-	"github.com/JLoup/xml/feed/atom"
-	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/feed/atom"
+	"github.com/jloup/xml/feed/extension"
+	"github.com/jloup/xml/utils"
 )
 
 var _total = xml.Name{Space: NS, Local: "total"}

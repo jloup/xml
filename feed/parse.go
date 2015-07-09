@@ -4,8 +4,8 @@ package feed
 import (
 	"io"
 
-	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/feed/extension"
+	"github.com/jloup/xml/utils"
 )
 
 // ParseOptions is passed to Parse functions to customize their behaviors

@@ -3,7 +3,7 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 )
 
 type InlineTextContent struct {

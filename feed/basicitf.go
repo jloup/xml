@@ -3,8 +3,8 @@ package feed
 import (
 	"time"
 
-	"github.com/JLoup/xml/feed/atom"
-	"github.com/JLoup/xml/feed/rss"
+	"github.com/jloup/xml/feed/atom"
+	"github.com/jloup/xml/feed/rss"
 )
 
 // BasicEntryBlock is a common brick to build UserFeed

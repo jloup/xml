@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 )
 
 func NewTestLogo(iri string) *Logo {

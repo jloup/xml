@@ -3,7 +3,7 @@ package extension
 import (
 	"encoding/xml"
 
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 )
 
 type BasicAttr struct {

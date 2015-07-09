@@ -3,7 +3,7 @@ package extension
 import (
 	"encoding/xml"
 
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 )
 
 // attribute extension interface - e.g. thr:count attribute

@@ -4,9 +4,9 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/JLoup/errors"
-	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/errors"
+	"github.com/jloup/xml/feed/extension"
+	"github.com/jloup/xml/utils"
 )
 
 type Category struct {

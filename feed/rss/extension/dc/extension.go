@@ -2,9 +2,9 @@
 package dc
 
 import (
-	"github.com/JLoup/xml/feed/extension"
-	"github.com/JLoup/xml/feed/rss"
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/feed/extension"
+	"github.com/jloup/xml/feed/rss"
+	"github.com/jloup/xml/utils"
 )
 
 const NS = "http://purl.org/dc/elements/1.1/"

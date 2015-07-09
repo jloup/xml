@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/JLoup/xml/feed"
-	"github.com/JLoup/xml/feed/atom"
-	"github.com/JLoup/xml/feed/rss"
-	"github.com/JLoup/xml/feed/rss/extension/dc"
+	"github.com/jloup/xml/feed"
+	"github.com/jloup/xml/feed/atom"
+	"github.com/jloup/xml/feed/rss"
+	"github.com/jloup/xml/feed/rss/extension/dc"
 
-	"github.com/JLoup/xml/feed/extension"
+	"github.com/jloup/xml/feed/extension"
 )
 
 type ExtendedFeed struct {
@@ -49,10 +49,10 @@ func ExampleUserFeed_extension() {
 		return
 	}
 
-	//Manager is in github.com/JLoup/xml/feed/extension
+	//Manager is in github.com/jloup/xml/feed/extension
 	manager := extension.Manager{}
 	// we add the dc extension to it
-	// dc extension is in "github.com/JLoup/xml/feed/rss/extension/dc"
+	// dc extension is in "github.com/jloup/xml/feed/rss/extension/dc"
 	dc.AddToManager(&manager)
 
 	opt := feed.DefaultOptions

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/JLoup/xml/feed"
-	"github.com/JLoup/xml/feed/atom"
-	"github.com/JLoup/xml/feed/rss"
+	"github.com/jloup/xml/feed"
+	"github.com/jloup/xml/feed/atom"
+	"github.com/jloup/xml/feed/rss"
 )
 
 type MyFeed struct {

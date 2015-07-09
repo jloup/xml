@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/xml/utils"
 	"fmt"
 	"testing"
 )

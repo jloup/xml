@@ -3,8 +3,8 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/JLoup/errors"
-	"github.com/JLoup/xml/utils"
+	"github.com/jloup/errors"
+	"github.com/jloup/xml/utils"
 )
 
 type OutOfLineContent struct {

@@ -13,12 +13,12 @@ If you want to take a deeper dive into how you can customize the parser behavior
 
 Get the pkg
 ```
-go get github.com/JLoup/xml
+go get github.com/jloup/xml
 ```
 
 Use it in code
 ```
-import "github.com/JLoup/xml/feed"
+import "github.com/jloup/xml/feed"
 ```
 
 #### <a name="simple"></a>Simple Use : feed.Parse(io.Reader, feed.DefaultOptions)
@@ -77,9 +77,9 @@ BasicFeed is really basic struct implementing **feed.UserFeed** interface. You m
 ```go
 
 type UserFeed interface {
-    PopulateFromAtomFeed(f *atom.Feed) // see github.com/JLoup/xml/feed/atom
+    PopulateFromAtomFeed(f *atom.Feed) // see github.com/jloup/xml/feed/atom
     PopulateFromAtomEntry(e *atom.Entry)
-    PopulateFromRssChannel(c *rss.Channel) // see github.com/JLoup/xml/feed/rss
+    PopulateFromRssChannel(c *rss.Channel) // see github.com/jloup/xml/feed/rss
     PopulateFromRssItem(i *rss.Item)
 }
 
@@ -154,8 +154,8 @@ FEED 'Me, Myself and I' generated with http://www.atomgenerator.com/ V1.0
 RSS and Atom feeds should conform to a specification (which is complex for Atom). The common behavior of Parse functions is to not be too restrictive about input feeds. To validate feeds, you can pass a custom FlagChecker to ParseOptions. If you really know what you are doing you can enable/disable only some spec checks.
 
 Error flags can be found for each standard in packages documentation:
-- RSS : github.com/JLoup/xml/feed/rss
-- Atom : github.com/JLoup/xml/feed/atom
+- RSS : github.com/jloup/xml/feed/rss
+- Atom : github.com/jloup/xml/feed/atom
 
 Example:
 ```go
@@ -191,7 +191,7 @@ in 'feed':
 ```
 
 #### <a name="extension"></a>Rss and Atom extensions
-Both formats allow to add third party extensions. Some extensions have been implemented for the example e.g. RSS dc:creator (github.com/JLoup/xml/feed/rss/extension/dc)
+Both formats allow to add third party extensions. Some extensions have been implemented for the example e.g. RSS dc:creator (github.com/jloup/xml/feed/rss/extension/dc)
 
 Example:
 ```go
@@ -232,10 +232,10 @@ func main() {
         return
     }
 
-    //Manager is in github.com/JLoup/xml/feed/extension
+    //Manager is in github.com/jloup/xml/feed/extension
     manager := extension.Manager{}
     // we add the dc extension to it
-    // dc extension is in "github.com/JLoup/xml/feed/rss/extension/dc"
+    // dc extension is in "github.com/jloup/xml/feed/rss/extension/dc"
     dc.AddToManager(&manager)
 
     opt := feed.DefaultOptions
