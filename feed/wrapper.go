@@ -30,7 +30,6 @@ func newWrapperExt(manager extension.Manager) *wrapper {
 }
 
 func (w *wrapper) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
-
 	switch el.Name.Local {
 	case "feed":
 		w.AtomFeed = atom.NewFeedExt(w.Extensions.Manager)

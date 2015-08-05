@@ -4,9 +4,12 @@ package feed
 import (
 	"io"
 
+	"github.com/jloup/flag"
 	"github.com/jloup/xml/feed/extension"
 	"github.com/jloup/xml/utils"
 )
+
+var NoFeedFound = flag.InitFlag(&utils.ErrorFlagCounter, "NoFeedFound")
 
 // ParseOptions is passed to Parse functions to customize their behaviors
 type ParseOptions struct {
@@ -35,6 +38,10 @@ func ParseCustom(r io.Reader, feed UserFeed, options ParseOptions) error {
 
 	if err != nil {
 		return err
+	}
+
+	if w.AtomFeed == nil && w.RssChannel == nil && w.AtomEntry == nil {
+		return utils.NewError(NoFeedFound, "no feed has been found")
 	}
 
 	w.Populate(feed)
