@@ -3,13 +3,13 @@ package extension
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/xml/utils"
+	"github.com/jloup/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type storeInterface interface {
 	String() string
-	Validate() utils.ParserError
+	Validate() xmlutils.ParserError
 }
 
 type eStore struct {
@@ -19,7 +19,7 @@ type eStore struct {
 
 type Store struct {
 	stores []eStore
-	Occ    utils.OccurenceCollection
+	Occ    xmlutils.OccurenceCollection
 }
 
 func (s *Store) find(name xml.Name) int {
@@ -78,7 +78,7 @@ func (s *Store) GetCollection(name xml.Name) ([]storeInterface, bool) {
 
 }
 
-func (s *Store) Validate(errorAgg *errors.ErrorAggregator) {
+func (s *Store) Validate(errorAgg *utils.ErrorAggregator) {
 	for _, store := range s.stores {
 		for _, ext := range store.extensions {
 			if _, ok := ext.(Attr); ok {

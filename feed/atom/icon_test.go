@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestIcon(iri string) *Icon {
@@ -23,11 +23,11 @@ func IconWithBaseLang(i *Icon, lang, base string) *Icon {
 
 type testIcon struct {
 	XML           string
-	ExpectedError utils.ParserError
+	ExpectedError xmlutils.ParserError
 	ExpectedIcon  *Icon
 }
 
-func testIconValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testIconValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	i1 := actual.(*Icon)
 	i2 := expected.(*Icon)
 
@@ -41,12 +41,12 @@ func testIconValidator(actual utils.Visitor, expected utils.Visitor) error {
 
 	return nil
 }
-func testIconConstructor() utils.Visitor {
+func testIconConstructor() xmlutils.Visitor {
 	return NewIcon()
 }
 
-func testIconToTestVisitor(t testIcon) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func testIconToTestVisitor(t testIcon) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedIcon,
@@ -73,7 +73,7 @@ func TestIconBasic(t *testing.T) {
 			NewTestIcon("https://www.yo.com"),
 		},
 		{`<icon>https://www.%yo.com</icon>`,
-			utils.NewError(IriNotValid, ""),
+			xmlutils.NewError(IriNotValid, ""),
 			NewTestIcon("https://www.%yo.com"),
 		},
 	}

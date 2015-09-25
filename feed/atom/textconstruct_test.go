@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestTextConstruct(xhtml, plaintext string) *TextConstruct {
@@ -26,11 +26,11 @@ func TextConstructWithBaseLang(t *TextConstruct, lang, base string) *TextConstru
 
 type testTextConstruct struct {
 	XML                   string
-	ExpectedError         utils.ParserError
+	ExpectedError         xmlutils.ParserError
 	ExpectedTextConstruct *TextConstruct
 }
 
-func testTextConstructValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testTextConstructValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	t1 := actual.(*TextConstruct)
 	t2 := expected.(*TextConstruct)
 
@@ -49,12 +49,12 @@ func testTextConstructValidator(actual utils.Visitor, expected utils.Visitor) er
 	return nil
 }
 
-func testTextConstructConstructor() utils.Visitor {
+func testTextConstructConstructor() xmlutils.Visitor {
 	return NewTextConstruct()
 }
 
-func _TestTextConstructToTestVisitor(t testTextConstruct) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func _TestTextConstructToTestVisitor(t testTextConstruct) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedTextConstruct,
@@ -79,7 +79,7 @@ func TestTextConstructBasic(t *testing.T) {
 		},
 		{`
     <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">This is is <b>XHTML</b> content</div><div lambda="3" xmlns="http://www.w3.org/1999/xhtml">this is not usual child</div></summary>`,
-			utils.NewError(NotUniqueChild, ""),
+			xmlutils.NewError(NotUniqueChild, ""),
 			NewTestTextConstruct("<div>This is is <b>XHTML</b> content</div><div lambda=\"3\">this is not usual child</div>", ""),
 		},
 		{`
@@ -89,7 +89,7 @@ func TestTextConstructBasic(t *testing.T) {
 		},
 		{`
     <summary type="xhtml"><div>This is is <b>XHTML</b> content</div></summary>`,
-			utils.NewError(XHTMLElementNotNamespaced, ""),
+			xmlutils.NewError(XHTMLElementNotNamespaced, ""),
 			NewTestTextConstruct("<div>This is is <b>XHTML</b> content</div>", ""),
 		},
 		{`
@@ -104,7 +104,7 @@ func TestTextConstructBasic(t *testing.T) {
 		},
 		{`
     <summary type="text"><div><a>CHILD</a></div><div>CHILD2</div></summary>`,
-			utils.NewError(LeafElementHasChild, ""),
+			xmlutils.NewError(LeafElementHasChild, ""),
 			NewTestTextConstruct("", "CHILD2"),
 		},
 		{`
@@ -119,7 +119,7 @@ func TestTextConstructBasic(t *testing.T) {
 		},
 		{`
     <summary type="xhtml" xmlns:h="http://www.w3.org/1999/xhtml"><h:p>This is is <h:b>XHTML</h:b> content</h:p></summary>`,
-			utils.NewError(XHTMLRootNodeNotDiv, ""),
+			xmlutils.NewError(XHTMLRootNodeNotDiv, ""),
 			NewTestTextConstruct("<p>This is is <b>XHTML</b> content</p>", ""),
 		},
 	}

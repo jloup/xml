@@ -3,28 +3,27 @@ package utils
 import (
 	"fmt"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/flag"
+	"github.com/jloup/utils"
 )
 
 var (
-	ErrorFlagCounter flag.Counter = 0
-	XMLTokenError                 = flag.InitFlag(&ErrorFlagCounter, "XMLTokenError")
-	XMLSyntaxError                = flag.InitFlag(&ErrorFlagCounter, "XMLSyntaxError")
-	XMLError                      = flag.Join("XMLError", XMLSyntaxError, XMLTokenError)
-	IOError                       = flag.InitFlag(&ErrorFlagCounter, "IOError")
+	ErrorFlagCounter utils.Counter = 0
+	XMLTokenError                  = utils.InitFlag(&ErrorFlagCounter, "XMLTokenError")
+	XMLSyntaxError                 = utils.InitFlag(&ErrorFlagCounter, "XMLSyntaxError")
+	XMLError                       = utils.Join("XMLError", XMLSyntaxError, XMLTokenError)
+	IOError                        = utils.InitFlag(&ErrorFlagCounter, "IOError")
 )
 
 type ParserError interface {
-	errors.ErrorFlagged
+	utils.ErrorFlagged
 }
 
 type Error struct {
-	flag flag.Flag
+	flag utils.Flag
 	msg  string
 }
 
-func NewError(f flag.Flag, msg string) ParserError {
+func NewError(f utils.Flag, msg string) ParserError {
 	return Error{flag: f, msg: msg}
 }
 
@@ -32,14 +31,14 @@ func (s Error) Error() string {
 	return fmt.Sprintf("[%s] %s", s.FlagString(), s.msg)
 }
 
-func (s Error) ErrorWithCode(f flag.Flag) errors.ErrorFlagged {
-	if flag.Intersect(f, s.flag) {
+func (s Error) ErrorWithCode(f utils.Flag) utils.ErrorFlagged {
+	if utils.Intersect(f, s.flag) {
 		return s
 	}
 	return nil
 }
 
-func (s Error) Flag() flag.Flag {
+func (s Error) Flag() utils.Flag {
 	return s.flag
 }
 
@@ -60,11 +59,11 @@ func (d *delegatedError) Error() string {
 	return fmt.Sprintf("in '%s':\n%s", d.tokenName, d.delegatedError.Error())
 }
 
-func (d *delegatedError) ErrorWithCode(f flag.Flag) errors.ErrorFlagged {
+func (d *delegatedError) ErrorWithCode(f utils.Flag) utils.ErrorFlagged {
 	return d.delegatedError.ErrorWithCode(f)
 }
 
-func (d *delegatedError) Flag() flag.Flag {
+func (d *delegatedError) Flag() utils.Flag {
 	return d.delegatedError.Flag()
 }
 

@@ -4,15 +4,15 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Content struct {
 	CommonAttributes
-	Type utils.Element
-	Src  utils.Element
+	Type xmlutils.Element
+	Src  xmlutils.Element
 
 	XHTML            *InlineXHTMLContent
 	PlainText        *InlineTextContent
@@ -21,14 +21,14 @@ type Content struct {
 
 	hasStarted bool
 	Extension  extension.VisitorExtension
-	Parent     utils.Visitor
+	Parent     xmlutils.Visitor
 }
 
 func NewContent() *Content {
 	c := Content{hasStarted: false}
 
-	c.Type = utils.NewElement("type", "text", utils.Nop)
-	c.Src = utils.NewElement("src", "", utils.Nop)
+	c.Type = xmlutils.NewElement("type", "text", xmlutils.Nop)
+	c.Src = xmlutils.NewElement("src", "", xmlutils.Nop)
 
 	c.XHTML = NewInlineXHTMLContent()
 	c.PlainText = NewInlineTextContent()
@@ -62,11 +62,11 @@ func (c *Content) HasReadableContent() bool {
 	return c.hasStarted && (c.Type.Value == "text" || c.Type.Value == "html" || c.Type.Value == "xhtml" || c.InlineContent.HasReadableContent())
 }
 
-func (c *Content) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (c *Content) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	c.reset()
 	for _, attr := range el.Attr {
 		switch attr.Name.Space {
-		case utils.XML_NS:
+		case xmlutils.XML_NS:
 			c.ProcessAttr(attr)
 		case "":
 			switch attr.Name.Local {
@@ -96,7 +96,7 @@ func (c *Content) ProcessStartElement(el utils.StartElement) (utils.Visitor, uti
 	return c.InlineContent.ProcessStartElement(el)
 }
 
-func (c *Content) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (c *Content) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if c.Type.Value != "text" && c.Type.Value != "html" && c.Type.Value != "xhtml" {
 		if c.Parent != nil {
 			return c.Parent.ProcessEndElement(el)
@@ -106,12 +106,12 @@ func (c *Content) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.Par
 	return c.Parent, nil
 }
 
-func (c *Content) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (c *Content) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return c, nil
 }
 
-func (c *Content) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (c *Content) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
 	c.Extension.Validate(&error)
 	c.ValidateCommonAttributes("content", &error)

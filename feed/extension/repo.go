@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jloup/flag"
+	"github.com/jloup/utils"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func xmlNameToString(name xml.Name) string {
@@ -27,7 +27,7 @@ type eAttr struct {
 // base element for Manager
 type Repository struct {
 	name     string
-	Occ      utils.OccurenceCollection
+	Occ      xmlutils.OccurenceCollection
 	elements []eElement
 	attrs    []eAttr
 }
@@ -41,14 +41,14 @@ func (r *Repository) findAttr(name xml.Name) int {
 	return -1
 }
 
-func (r *Repository) AddAttr(name xml.Name, constructor AttrConstructor, attrDuplicatedFlag flag.Flag) error {
+func (r *Repository) AddAttr(name xml.Name, constructor AttrConstructor, attrDuplicatedFlag utils.Flag) error {
 
 	if index := r.findAttr(name); index != -1 {
 		return errors.New("an extension of this name already exists")
 	}
 
 	r.attrs = append(r.attrs, eAttr{name: name, constructor: constructor})
-	r.Occ.AddOccurence(utils.NewOccurence(xmlNameToString(name), utils.UniqueValidator(attrDuplicatedFlag)))
+	r.Occ.AddOccurence(xmlutils.NewOccurence(xmlNameToString(name), xmlutils.UniqueValidator(attrDuplicatedFlag)))
 
 	return nil
 }
@@ -70,14 +70,14 @@ func (r *Repository) findElement(name xml.Name) int {
 	return -1
 }
 
-func (r *Repository) AddElement(name xml.Name, constructor ElementConstructor, occValidator utils.OccurenceValidator) error {
+func (r *Repository) AddElement(name xml.Name, constructor ElementConstructor, occValidator xmlutils.OccurenceValidator) error {
 
 	if index := r.findElement(name); index != -1 {
 		return errors.New("an extension of this name already exists")
 	}
 
 	r.elements = append(r.elements, eElement{name: name, constructor: constructor})
-	r.Occ.AddOccurence(utils.NewOccurence(xmlNameToString(name), occValidator))
+	r.Occ.AddOccurence(xmlutils.NewOccurence(xmlNameToString(name), occValidator))
 
 	return nil
 }
@@ -123,12 +123,12 @@ func (m *Manager) find(name string) int {
 	return -1
 }
 
-func (m *Manager) AddAttrExtension(tagName string, name xml.Name, constructor AttrConstructor, attrDuplicatedFlag flag.Flag) error {
+func (m *Manager) AddAttrExtension(tagName string, name xml.Name, constructor AttrConstructor, attrDuplicatedFlag utils.Flag) error {
 	index := m.findAndCreate(tagName)
 	return m.tags[index].AddAttr(name, constructor, attrDuplicatedFlag)
 }
 
-func (m *Manager) AddElementExtension(tagName string, name xml.Name, constructor ElementConstructor, occValidator utils.OccurenceValidator) error {
+func (m *Manager) AddElementExtension(tagName string, name xml.Name, constructor ElementConstructor, occValidator xmlutils.OccurenceValidator) error {
 	index := m.findAndCreate(tagName)
 	return m.tags[index].AddElement(name, constructor, occValidator)
 }

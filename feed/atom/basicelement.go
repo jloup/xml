@@ -5,23 +5,23 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type BasicElement struct {
 	CommonAttributes
-	Content utils.Element
+	Content xmlutils.Element
 	name    xml.Name
 
 	Extension extension.VisitorExtension
-	depth     utils.DepthWatcher
-	Parent    utils.Visitor
+	depth     xmlutils.DepthWatcher
+	Parent    xmlutils.Visitor
 }
 
-func NewBasicElement(parent utils.Visitor) *BasicElement {
-	b := BasicElement{Parent: parent, depth: utils.NewDepthWatcher()}
+func NewBasicElement(parent xmlutils.Visitor) *BasicElement {
+	b := BasicElement{Parent: parent, depth: xmlutils.NewDepthWatcher()}
 	b.depth.SetMaxDepth(1)
 
 	b.InitCommonAttributes()
@@ -29,7 +29,7 @@ func NewBasicElement(parent utils.Visitor) *BasicElement {
 	return &b
 }
 
-func NewBasicElementExt(parent utils.Visitor, manager extension.Manager) *BasicElement {
+func NewBasicElementExt(parent xmlutils.Visitor, manager extension.Manager) *BasicElement {
 	b := NewBasicElement(parent)
 
 	b.Extension = extension.InitExtension("basicelement", manager)
@@ -37,7 +37,7 @@ func NewBasicElementExt(parent utils.Visitor, manager extension.Manager) *BasicE
 	return b
 }
 
-func (b *BasicElement) SetParent(parent utils.Visitor) {
+func (b *BasicElement) SetParent(parent xmlutils.Visitor) {
 	b.Parent = parent
 }
 
@@ -45,7 +45,7 @@ func (b *BasicElement) Name() xml.Name {
 	return b.name
 }
 
-func (b *BasicElement) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (b *BasicElement) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if b.depth.IsRoot() {
 		b.name = el.Name
 		b.Extension = extension.InitExtension(b.name.Local, b.Extension.Manager)
@@ -57,34 +57,34 @@ func (b *BasicElement) ProcessStartElement(el utils.StartElement) (utils.Visitor
 		}
 	}
 
-	if b.depth.Down() == utils.MaxDepthReached {
-		return b, utils.NewError(LeafElementHasChild, fmt.Sprintf("'%s' shoud not have childs", b.name.Local))
+	if b.depth.Down() == xmlutils.MaxDepthReached {
+		return b, xmlutils.NewError(LeafElementHasChild, fmt.Sprintf("'%s' shoud not have childs", b.name.Local))
 	}
 
 	return b, nil
 }
 
-func (b *BasicElement) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if b.depth.Up() == utils.RootLevel {
+func (b *BasicElement) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if b.depth.Up() == xmlutils.RootLevel {
 		return b.Parent, b.Validate()
 	}
 
 	return b, nil
 }
 
-func (b *BasicElement) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (b *BasicElement) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	b.Content.Value = strings.TrimSpace(string(el))
 	return b, nil
 }
 
-func (b *BasicElement) Validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (b *BasicElement) Validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
 	b.Extension.Validate(&error)
 	b.ValidateCommonAttributes(b.name.Local, &error)
 
 	if err := b.Content.Validate(); err != nil {
-		error.NewError(utils.NewError(err.Flag(), fmt.Sprintf("%s's %s", b.name.Local, err.Msg())))
+		error.NewError(xmlutils.NewError(err.Flag(), fmt.Sprintf("%s's %s", b.name.Local, err.Msg())))
 	}
 
 	return error.ErrorObject()

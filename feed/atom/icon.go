@@ -3,24 +3,24 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Icon struct {
 	CommonAttributes
-	Iri utils.Element
+	Iri xmlutils.Element
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewIcon() *Icon {
-	i := Icon{depth: utils.NewDepthWatcher()}
+	i := Icon{depth: xmlutils.NewDepthWatcher()}
 
-	i.Iri = utils.NewElement("iri", "", IsValidIRI)
+	i.Iri = xmlutils.NewElement("iri", "", IsValidIRI)
 
 	i.InitCommonAttributes()
 	i.depth.SetMaxDepth(1)
@@ -35,7 +35,7 @@ func NewIconExt(manager extension.Manager) *Icon {
 	return i
 }
 
-func (i *Icon) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (i *Icon) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if i.depth.IsRoot() {
 		i.ResetAttr()
 		for _, attr := range el.Attr {
@@ -45,30 +45,30 @@ func (i *Icon) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.
 		}
 	}
 
-	if i.depth.Down() == utils.MaxDepthReached {
-		return i, utils.NewError(LeafElementHasChild, "icon element should not have childs")
+	if i.depth.Down() == xmlutils.MaxDepthReached {
+		return i, xmlutils.NewError(LeafElementHasChild, "icon element should not have childs")
 	}
 
 	return i, nil
 }
 
-func (i *Icon) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if i.depth.Up() == utils.RootLevel {
+func (i *Icon) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if i.depth.Up() == xmlutils.RootLevel {
 		return i.Parent, i.validate()
 	}
 
 	return i, nil
 }
 
-func (i *Icon) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (i *Icon) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	i.Iri.Value = string(el)
 	return i, nil
 }
 
-func (i *Icon) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (i *Icon) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElement("icon", i.Iri, &error)
+	xmlutils.ValidateElement("icon", i.Iri, &error)
 	i.Extension.Validate(&error)
 	i.ValidateCommonAttributes("icon", &error)
 

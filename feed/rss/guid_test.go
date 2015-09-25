@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -17,11 +17,11 @@ func NewTestGuid(isPermalink, content string) *Guid {
 
 type testGuid struct {
 	XML           string
-	ExpectedError utils.ParserError
+	ExpectedError xmlutils.ParserError
 	ExpectedGuid  *Guid
 }
 
-func testGuidValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testGuidValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	g1 := actual.(*Guid)
 	g2 := expected.(*Guid)
 
@@ -36,12 +36,12 @@ func testGuidValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testGuidConstructor() utils.Visitor {
+func testGuidConstructor() xmlutils.Visitor {
 	return NewGuid()
 }
 
-func _TestGuidToTestVisitor(t testGuid) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func _TestGuidToTestVisitor(t testGuid) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedGuid,

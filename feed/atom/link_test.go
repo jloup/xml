@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestLink(href, rel, typ, hrelang, title, length string) *Link {
@@ -28,11 +28,11 @@ func LinkWithBaseLang(l *Link, lang, base string) *Link {
 
 type testLink struct {
 	XML           string
-	ExpectedError utils.ParserError
+	ExpectedError xmlutils.ParserError
 	ExpectedLink  *Link
 }
 
-func testLinkValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testLinkValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	l1 := actual.(*Link)
 	l2 := expected.(*Link)
 
@@ -67,12 +67,12 @@ func testLinkValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testLinkConstructor() utils.Visitor {
+func testLinkConstructor() xmlutils.Visitor {
 	return NewLink()
 }
 
-func testLinkToTestVisitor(t testLink) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func testLinkToTestVisitor(t testLink) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedLink,
@@ -95,19 +95,19 @@ func TestLinkBasic(t *testing.T) {
 			LinkWithBaseLang(NewTestLink("http://www.go.com", "alternate", "text/html", "", "", ""), "en-us", "http://yo.com"),
 		},
 		{`<link rel="alternate" type="text/html"/>`,
-			utils.NewError(MissingAttribute, ""),
+			xmlutils.NewError(MissingAttribute, ""),
 			NewTestLink("", "alternate", "text/html", "", "", ""),
 		},
 		{`<link rel="alternate" type="text/html" href="http://%%%www.go.com"/>`,
-			utils.NewError(IriNotValid, ""),
+			xmlutils.NewError(IriNotValid, ""),
 			NewTestLink("http://%%%www.go.com", "alternate", "text/html", "", "", ""),
 		},
 		{`<link rel="alternate" type="text/html" href="http://www.go.com" length="-56"/>`,
-			utils.NewError(NotPositiveNumber, ""),
+			xmlutils.NewError(NotPositiveNumber, ""),
 			NewTestLink("http://www.go.com", "alternate", "text/html", "", "", "-56"),
 		},
 		{`<link rel="alternate" type="text/html" href="http://www.go.com" length="ab"/>`,
-			utils.NewError(NotPositiveNumber, ""),
+			xmlutils.NewError(NotPositiveNumber, ""),
 			NewTestLink("http://www.go.com", "alternate", "text/html", "", "", "ab"),
 		},
 	}

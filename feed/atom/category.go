@@ -3,33 +3,33 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Category struct {
 	CommonAttributes
-	Term   utils.Element
-	Scheme utils.Element
-	Label  utils.Element
-	Parent utils.Visitor
+	Term   xmlutils.Element
+	Scheme xmlutils.Element
+	Label  xmlutils.Element
+	Parent xmlutils.Visitor
 
 	Extension extension.VisitorExtension
-	depth     utils.DepthWatcher
+	depth     xmlutils.DepthWatcher
 }
 
 func NewCategory() *Category {
-	c := Category{depth: utils.NewDepthWatcher()}
+	c := Category{depth: xmlutils.NewDepthWatcher()}
 
-	c.Term = utils.NewElement("term", "", utils.Nop)
-	c.Term.SetOccurence(utils.NewOccurence("term", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Term = xmlutils.NewElement("term", "", xmlutils.Nop)
+	c.Term.SetOccurence(xmlutils.NewOccurence("term", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Scheme = utils.NewElement("scheme", "", IsValidIRI)
-	c.Scheme.SetOccurence(utils.NewOccurence("scheme", utils.UniqueValidator(AttributeDuplicated)))
+	c.Scheme = xmlutils.NewElement("scheme", "", IsValidIRI)
+	c.Scheme.SetOccurence(xmlutils.NewOccurence("scheme", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	c.Label = utils.NewElement("label", "", utils.Nop)
-	c.Label.SetOccurence(utils.NewOccurence("label", utils.UniqueValidator(AttributeDuplicated)))
+	c.Label = xmlutils.NewElement("label", "", xmlutils.Nop)
+	c.Label.SetOccurence(xmlutils.NewOccurence("label", xmlutils.UniqueValidator(AttributeDuplicated)))
 
 	c.InitCommonAttributes()
 
@@ -50,12 +50,12 @@ func (c *Category) reset() {
 	c.ResetAttr()
 }
 
-func (c *Category) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (c *Category) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if c.depth.IsRoot() {
 		c.reset()
 		for _, attr := range el.Attr {
 			switch attr.Name.Space {
-			case utils.XML_NS:
+			case xmlutils.XML_NS:
 				c.ProcessAttr(attr)
 			case "":
 				switch attr.Name.Local {
@@ -82,22 +82,22 @@ func (c *Category) ProcessStartElement(el utils.StartElement) (utils.Visitor, ut
 	return c, nil
 }
 
-func (c *Category) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if c.depth.Up() == utils.RootLevel {
+func (c *Category) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if c.depth.Up() == xmlutils.RootLevel {
 		return c.Parent, c.validate()
 	}
 
 	return c, nil
 }
 
-func (c *Category) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (c *Category) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return c, nil
 }
 
-func (c *Category) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (c *Category) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("category", &error, c.Term, c.Label, c.Scheme)
+	xmlutils.ValidateElements("category", &error, c.Term, c.Label, c.Scheme)
 	c.ValidateCommonAttributes("category", &error)
 
 	c.Extension.Validate(&error)

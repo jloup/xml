@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestGenerator(version, uri, content string) *Generator {
@@ -25,11 +25,11 @@ func GeneratorWithBaseLang(g *Generator, lang, base string) *Generator {
 
 type testGenerator struct {
 	XML               string
-	ExpectedError     utils.ParserError
+	ExpectedError     xmlutils.ParserError
 	ExpectedGenerator *Generator
 }
 
-func testGeneratorValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testGeneratorValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	g1 := actual.(*Generator)
 	g2 := expected.(*Generator)
 
@@ -52,12 +52,12 @@ func testGeneratorValidator(actual utils.Visitor, expected utils.Visitor) error 
 	return nil
 }
 
-func testGeneratorConstructor() utils.Visitor {
+func testGeneratorConstructor() xmlutils.Visitor {
 	return NewGenerator()
 }
 
-func testGeneratorToTestVisitor(t testGenerator) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func testGeneratorToTestVisitor(t testGenerator) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedGenerator,
@@ -84,11 +84,11 @@ func TestGeneratorBasic(t *testing.T) {
 			NewTestGenerator("4.0", "http://there.com", "my generator"),
 		},
 		{`<generator uri="http://there.com" version="4.0"><name>CHILD</name></generator>`,
-			utils.NewError(LeafElementHasChild, ""),
+			xmlutils.NewError(LeafElementHasChild, ""),
 			NewTestGenerator("4.0", "http://there.com", "CHILD"),
 		},
 		{`<generator uri="http://%there.com" version="4.0">my generator</generator>`,
-			utils.NewError(IriNotValid, ""),
+			xmlutils.NewError(IriNotValid, ""),
 			NewTestGenerator("4.0", "http://%there.com", "my generator"),
 		},
 	}

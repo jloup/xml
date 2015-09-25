@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Date struct {
@@ -15,12 +15,12 @@ type Date struct {
 	Time time.Time
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewDate() *Date {
-	d := Date{depth: utils.NewDepthWatcher()}
+	d := Date{depth: xmlutils.NewDepthWatcher()}
 	d.depth.SetMaxDepth(1)
 	d.InitCommonAttributes()
 
@@ -35,7 +35,7 @@ func NewDateExt(manager extension.Manager) *Date {
 	return d
 }
 
-func (d *Date) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (d *Date) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if d.depth.IsRoot() {
 		d.ResetAttr()
 		for _, attr := range el.Attr {
@@ -45,29 +45,29 @@ func (d *Date) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.
 		}
 	}
 
-	if d.depth.Down() == utils.RootLevel {
-		return d.Parent, utils.NewError(LeafElementHasChild, "date construct shoud not have childs")
+	if d.depth.Down() == xmlutils.RootLevel {
+		return d.Parent, xmlutils.NewError(LeafElementHasChild, "date construct shoud not have childs")
 	}
 
 	return d, nil
 }
 
-func (d *Date) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (d *Date) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	return d.Parent, d.validate()
 }
 
-func (d *Date) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (d *Date) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	var err error
 	d.Time, err = time.Parse(time.RFC3339, string(el))
 
 	if err != nil || d.Time.IsZero() {
-		return d, utils.NewError(DateFormat, fmt.Sprintf("date not well formatted '%v'", string(el)))
+		return d, xmlutils.NewError(DateFormat, fmt.Sprintf("date not well formatted '%v'", string(el)))
 	}
 	return d, nil
 }
 
-func (d *Date) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (d *Date) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
 	d.Extension.Validate(&error)
 	d.ValidateCommonAttributes("date", &error)

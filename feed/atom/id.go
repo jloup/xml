@@ -4,24 +4,24 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Id struct {
 	CommonAttributes
-	Content utils.Element
+	Content xmlutils.Element
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewId() *Id {
-	i := Id{depth: utils.NewDepthWatcher()}
+	i := Id{depth: xmlutils.NewDepthWatcher()}
 
-	i.Content = utils.NewElement("iri", "", IsAbsoluteIRI)
+	i.Content = xmlutils.NewElement("iri", "", IsAbsoluteIRI)
 
 	i.InitCommonAttributes()
 	i.depth.SetMaxDepth(1)
@@ -36,7 +36,7 @@ func NewIdExt(manager extension.Manager) *Id {
 
 	return i
 }
-func (i *Id) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (i *Id) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if i.depth.IsRoot() {
 		i.ResetAttr()
 		for _, attr := range el.Attr {
@@ -46,30 +46,30 @@ func (i *Id) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.Pa
 		}
 	}
 
-	if i.depth.Down() == utils.MaxDepthReached {
-		return i, utils.NewError(LeafElementHasChild, "id element should not have childs")
+	if i.depth.Down() == xmlutils.MaxDepthReached {
+		return i, xmlutils.NewError(LeafElementHasChild, "id element should not have childs")
 	}
 
 	return i, nil
 }
 
-func (i *Id) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if i.depth.Up() == utils.RootLevel {
+func (i *Id) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if i.depth.Up() == xmlutils.RootLevel {
 		return i.Parent, i.validate()
 	}
 
 	return i, nil
 }
 
-func (i *Id) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (i *Id) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	i.Content.Value = strings.TrimSpace(string(el))
 	return i, nil
 }
 
-func (i *Id) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (i *Id) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElement("id", i.Content, &error)
+	xmlutils.ValidateElement("id", i.Content, &error)
 	i.Extension.Validate(&error)
 	i.ValidateCommonAttributes("id", &error)
 

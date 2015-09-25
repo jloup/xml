@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestContent(contentType, xhtml, plaintext, other, outsource string) *Content {
@@ -28,11 +28,11 @@ func ContentWithBaseLang(c *Content, lang, base string) *Content {
 
 type testContent struct {
 	XML             string
-	ExpectedError   utils.ParserError
+	ExpectedError   xmlutils.ParserError
 	ExpectedContent *Content
 }
 
-func testContentValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testContentValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	c1 := actual.(*Content)
 	c2 := expected.(*Content)
 
@@ -63,12 +63,12 @@ func testContentValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testContentConstructor() utils.Visitor {
+func testContentConstructor() xmlutils.Visitor {
 	return NewContent()
 }
 
-func _TestContentToTestVisitor(t testContent) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func _TestContentToTestVisitor(t testContent) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedContent,
@@ -105,32 +105,32 @@ func TestContentBasic(t *testing.T) {
 			NewTestContent("image/png", "", "", "", "image.png"),
 		},
 		{`<content src="/iri" type="text"/>`,
-			utils.NewError(ContentTypeIsNotValid, ""),
+			xmlutils.NewError(ContentTypeIsNotValid, ""),
 			NewTestContent("text", "", "", "", "/iri"),
 		},
 		{`<content src="/iri" type="html"/>`,
-			utils.NewError(ContentTypeIsNotValid, ""),
+			xmlutils.NewError(ContentTypeIsNotValid, ""),
 			NewTestContent("html", "", "", "", "/iri"),
 		},
 		{`<content src="/iri" type="xhtml"/>`,
-			utils.NewError(ContentTypeIsNotValid, ""),
+			xmlutils.NewError(ContentTypeIsNotValid, ""),
 			NewTestContent("xhtml", "", "", "", "/iri"),
 		},
 		{`<content src="http://%g.com" type="application/xml"/>`,
-			utils.NewError(IriNotValid, ""),
+			xmlutils.NewError(IriNotValid, ""),
 			NewTestContent("application/xml", "", "", "", "http://%g.com"),
 		},
 
 		{`<content src="http://g.com" type="application/xml">text</content>`,
-			utils.NewError(SourcedContentElementNotEmpty, ""),
+			xmlutils.NewError(SourcedContentElementNotEmpty, ""),
 			NewTestContent("application/xml", "", "", "", "http://g.com"), // content is ignored
 		},
 		{`<content src="http://g.com" type="application/xml"><div>CHILD</div></content>`,
-			utils.NewError(SourcedContentElementNotEmpty, ""),
+			xmlutils.NewError(SourcedContentElementNotEmpty, ""),
 			NewTestContent("application/xml", "", "", "", "http://g.com"), // content is ignored
 		},
 		{`<content src="http://g.com" type="xml"/>`,
-			utils.NewError(IsNotMIME, ""),
+			xmlutils.NewError(IsNotMIME, ""),
 			NewTestContent("xml", "", "", "", "http://g.com"),
 		},
 		{`<content type="text/plain">text</content>`,
@@ -138,15 +138,15 @@ func TestContentBasic(t *testing.T) {
 			NewTestContent("text/plain", "", "text", "", ""),
 		},
 		{`<content type="text/plain"><div>CHILD</div></content>`,
-			utils.NewError(LeafElementHasChild, ""),
+			xmlutils.NewError(LeafElementHasChild, ""),
 			NewTestContent("text/plain", "", "CHILD", "", ""),
 		},
 		{`<content type="text"><div>CHILD</div><p>CHILD2</p></content>`,
-			utils.NewError(LeafElementHasChild, ""),
+			xmlutils.NewError(LeafElementHasChild, ""),
 			NewTestContent("text", "", "CHILD2", "", ""),
 		},
 		{`<content type="html"><div>CHILD</div></content>`,
-			utils.NewError(LeafElementHasChild, ""),
+			xmlutils.NewError(LeafElementHasChild, ""),
 			NewTestContent("html", "", "CHILD", "", ""),
 		},
 		{`<content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">XHTML CHILD</div></content>`,
@@ -154,11 +154,11 @@ func TestContentBasic(t *testing.T) {
 			NewTestContent("xhtml", "<div>XHTML CHILD</div>", "", "", ""),
 		},
 		{`<content type="xhtml">XHTML CHILD</content>`,
-			utils.NewError(XHTMLRootNodeNotDiv, ""),
+			xmlutils.NewError(XHTMLRootNodeNotDiv, ""),
 			NewTestContent("xhtml", "XHTML CHILD", "", "", ""),
 		},
 		{`<content type="multipart/mixed"></content>`,
-			utils.NewError(IsNotMIME, ""),
+			xmlutils.NewError(IsNotMIME, ""),
 			NewTestContent("multipart/mixed", "", "", "", ""),
 		},
 	}

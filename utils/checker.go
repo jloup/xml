@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"github.com/jloup/errors"
-	"github.com/jloup/flag"
+	"github.com/jloup/utils"
 )
 
 const (
@@ -14,25 +13,25 @@ const (
 
 type FlagChecker interface {
 	CheckFlag(element string, mask ParserError) bool
-	ErrorWithCode(element string, mask ParserError) errors.ErrorFlagged
+	ErrorWithCode(element string, mask ParserError) utils.ErrorFlagged
 }
 
 type eUserError struct {
 	ElementName string
-	flag        flag.Flag
+	flag        utils.Flag
 }
 
 type ErrorChecker struct {
 	elementErrors    []eUserError
-	defaultErrorFlag flag.Flag
+	defaultErrorFlag utils.Flag
 }
 
 func NewErrorChecker(defaultError uint) ErrorChecker {
 	u := ErrorChecker{}
 	if defaultError == EnableAllError {
-		u.defaultErrorFlag = flag.NewBigInt(64)
+		u.defaultErrorFlag = utils.NewBigInt(64)
 	} else {
-		u.defaultErrorFlag = flag.Flag{}
+		u.defaultErrorFlag = utils.Flag{}
 	}
 	return u
 }
@@ -51,18 +50,18 @@ func (u *ErrorChecker) createNewElement(name string) int {
 		return i
 	}
 
-	u.elementErrors = append(u.elementErrors, eUserError{ElementName: name, flag: flag.Flag{}})
+	u.elementErrors = append(u.elementErrors, eUserError{ElementName: name, flag: utils.Flag{}})
 	return u.findElement(name)
 }
 
-func (u *ErrorChecker) EnableErrorChecking(element string, flags ...flag.Flag) {
+func (u *ErrorChecker) EnableErrorChecking(element string, flags ...utils.Flag) {
 	if element == AllError {
 		flags1 := append(flags, u.defaultErrorFlag)
-		u.defaultErrorFlag = flag.Join("", flags1...)
+		u.defaultErrorFlag = utils.Join("", flags1...)
 
 		for i, _ := range u.elementErrors {
 			flags2 := append(flags, u.elementErrors[i].flag)
-			u.elementErrors[i].flag = flag.Join("", flags2...)
+			u.elementErrors[i].flag = utils.Join("", flags2...)
 		}
 		return
 	}
@@ -73,15 +72,15 @@ func (u *ErrorChecker) EnableErrorChecking(element string, flags ...flag.Flag) {
 
 	}
 	flags = append(flags, u.elementErrors[i].flag)
-	u.elementErrors[i].flag = flag.Join("", flags...)
+	u.elementErrors[i].flag = utils.Join("", flags...)
 }
 
-func (u *ErrorChecker) DisableErrorChecking(element string, flags ...flag.Flag) {
+func (u *ErrorChecker) DisableErrorChecking(element string, flags ...utils.Flag) {
 	if element == AllError {
-		u.defaultErrorFlag = flag.Exclude(u.defaultErrorFlag, flags...)
+		u.defaultErrorFlag = utils.Exclude(u.defaultErrorFlag, flags...)
 
 		for i, _ := range u.elementErrors {
-			u.elementErrors[i].flag = flag.Exclude(u.elementErrors[i].flag, flags...)
+			u.elementErrors[i].flag = utils.Exclude(u.elementErrors[i].flag, flags...)
 		}
 		return
 	}
@@ -92,10 +91,10 @@ func (u *ErrorChecker) DisableErrorChecking(element string, flags ...flag.Flag) 
 		u.elementErrors[i].flag = u.defaultErrorFlag
 	}
 
-	u.elementErrors[i].flag = flag.Exclude(u.elementErrors[i].flag, flags...)
+	u.elementErrors[i].flag = utils.Exclude(u.elementErrors[i].flag, flags...)
 }
 
-func (u *ErrorChecker) Flag(element string) flag.Flag {
+func (u *ErrorChecker) Flag(element string) utils.Flag {
 	if i := u.findElement(element); i == -1 {
 		return u.defaultErrorFlag
 	} else {
@@ -107,14 +106,14 @@ func (u *ErrorChecker) Flag(element string) flag.Flag {
 func (u *ErrorChecker) CheckFlag(element string, mask ParserError) bool {
 
 	if index := u.findElement(element); index == -1 {
-		return flag.Intersect(u.defaultErrorFlag, mask.Flag())
+		return utils.Intersect(u.defaultErrorFlag, mask.Flag())
 	} else {
-		return flag.Intersect(u.elementErrors[index].flag, mask.Flag())
+		return utils.Intersect(u.elementErrors[index].flag, mask.Flag())
 	}
 	return false
 }
 
-func (u *ErrorChecker) ErrorWithCode(element string, mask ParserError) errors.ErrorFlagged {
+func (u *ErrorChecker) ErrorWithCode(element string, mask ParserError) utils.ErrorFlagged {
 
 	if index := u.findElement(element); index == -1 {
 		return mask.ErrorWithCode(u.defaultErrorFlag)

@@ -6,7 +6,7 @@ import (
 	"github.com/jloup/xml/feed/atom"
 	"github.com/jloup/xml/feed/extension"
 	"github.com/jloup/xml/feed/rss"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type wrapper struct {
@@ -29,7 +29,7 @@ func newWrapperExt(manager extension.Manager) *wrapper {
 	return w
 }
 
-func (w *wrapper) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (w *wrapper) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	switch el.Name.Local {
 	case "feed":
 		w.AtomFeed = atom.NewFeedExt(w.Extensions.Manager)
@@ -51,11 +51,11 @@ func (w *wrapper) ProcessStartElement(el utils.StartElement) (utils.Visitor, uti
 
 }
 
-func (w *wrapper) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (w *wrapper) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	return w, nil
 }
 
-func (w *wrapper) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (w *wrapper) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return w, nil
 }
 

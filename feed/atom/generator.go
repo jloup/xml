@@ -3,30 +3,30 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Generator struct {
 	CommonAttributes
-	Uri     utils.Element
-	Version utils.Element
+	Uri     xmlutils.Element
+	Version xmlutils.Element
 	Content string
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewGenerator() *Generator {
-	g := Generator{depth: utils.NewDepthWatcher()}
+	g := Generator{depth: xmlutils.NewDepthWatcher()}
 
-	g.Uri = utils.NewElement("uri", "", IsValidIRI)
-	g.Uri.SetOccurence(utils.NewOccurence("uri", utils.UniqueValidator(AttributeDuplicated)))
+	g.Uri = xmlutils.NewElement("uri", "", IsValidIRI)
+	g.Uri.SetOccurence(xmlutils.NewOccurence("uri", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	g.Version = utils.NewElement("version", "", utils.Nop)
-	g.Version.SetOccurence(utils.NewOccurence("version", utils.UniqueValidator(AttributeDuplicated)))
+	g.Version = xmlutils.NewElement("version", "", xmlutils.Nop)
+	g.Version.SetOccurence(xmlutils.NewOccurence("version", xmlutils.UniqueValidator(AttributeDuplicated)))
 
 	g.InitCommonAttributes()
 
@@ -47,12 +47,12 @@ func (g *Generator) reset() {
 	g.ResetAttr()
 }
 
-func (g *Generator) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (g *Generator) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if g.depth.IsRoot() {
 		g.reset()
 		for _, attr := range el.Attr {
 			switch attr.Name.Space {
-			case utils.XML_NS:
+			case xmlutils.XML_NS:
 				g.ProcessAttr(attr)
 
 			case "":
@@ -71,31 +71,31 @@ func (g *Generator) ProcessStartElement(el utils.StartElement) (utils.Visitor, u
 		}
 	}
 
-	if g.depth.Down() == utils.MaxDepthReached {
-		return g, utils.NewError(LeafElementHasChild, "'generator' shoud not have childs")
+	if g.depth.Down() == xmlutils.MaxDepthReached {
+		return g, xmlutils.NewError(LeafElementHasChild, "'generator' shoud not have childs")
 
 	}
 
 	return g, nil
 }
 
-func (g *Generator) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if g.depth.Up() == utils.RootLevel {
+func (g *Generator) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if g.depth.Up() == xmlutils.RootLevel {
 		return g.Parent, g.validate()
 	}
 
 	return g, nil
 }
 
-func (g *Generator) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (g *Generator) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	g.Content = string(el)
 	return g, nil
 }
 
-func (g *Generator) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (g *Generator) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("generator", &error, g.Uri, g.Version)
+	xmlutils.ValidateElements("generator", &error, g.Uri, g.Version)
 	g.Extension.Validate(&error)
 	g.ValidateCommonAttributes("generator", &error)
 

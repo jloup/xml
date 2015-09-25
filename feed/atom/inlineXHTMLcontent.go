@@ -6,27 +6,27 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/xml/utils"
+	"github.com/jloup/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type InlineXHTMLContent struct {
 	Content *bytes.Buffer
 
 	Encoder   *xml.Encoder
-	depth     utils.DepthWatcher
+	depth     xmlutils.DepthWatcher
 	completed bool
-	Parent    utils.Visitor
+	Parent    xmlutils.Visitor
 }
 
 func NewInlineXHTMLContent() *InlineXHTMLContent {
-	i := InlineXHTMLContent{depth: utils.NewDepthWatcher(), completed: false}
+	i := InlineXHTMLContent{depth: xmlutils.NewDepthWatcher(), completed: false}
 	i.Content = &bytes.Buffer{}
 	i.Encoder = xml.NewEncoder(i.Content)
 	return &i
 }
 
-func stripXHTMLNamespace(t utils.StartElement) utils.StartElement {
+func stripXHTMLNamespace(t xmlutils.StartElement) xmlutils.StartElement {
 	for i, attr := range t.Attr {
 		if attr.Name.Local == "xmlns" && attr.Value == "http://www.w3.org/1999/xhtml" {
 			t.Attr = append(t.Attr[:i], t.Attr[i+1:]...)
@@ -39,7 +39,7 @@ func stripXHTMLNamespace(t utils.StartElement) utils.StartElement {
 func (i *InlineXHTMLContent) EncodeXHTMLToken(t xml.Token) error {
 	var err error
 	switch t := t.(type) {
-	case utils.StartElement:
+	case xmlutils.StartElement:
 		t = stripXHTMLNamespace(t)
 		t.Name.Space = ""
 		err = i.Encoder.EncodeToken(*t.StartElement)
@@ -51,21 +51,21 @@ func (i *InlineXHTMLContent) EncodeXHTMLToken(t xml.Token) error {
 	return err
 }
 
-func (i *InlineXHTMLContent) CheckXHTMLSpace(el utils.StartElement) utils.ParserError {
+func (i *InlineXHTMLContent) CheckXHTMLSpace(el xmlutils.StartElement) xmlutils.ParserError {
 	if !el.Ns.Has("http://www.w3.org/1999/xhtml") {
-		return utils.NewError(XHTMLElementNotNamespaced, fmt.Sprintf("'%s' element is not in XHTML namespace (ns => '%s')", el.Name.Local, el.Name.Space))
+		return xmlutils.NewError(XHTMLElementNotNamespaced, fmt.Sprintf("'%s' element is not in XHTML namespace (ns => '%s')", el.Name.Local, el.Name.Space))
 	}
 	return nil
 }
 
-func (i *InlineXHTMLContent) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
-	err := errors.NewErrorAggregator()
+func (i *InlineXHTMLContent) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	err := utils.NewErrorAggregator()
 	if i.depth.Level == 0 && el.Name.Local != "div" {
-		err.NewError(utils.NewError(XHTMLRootNodeNotDiv, "Inline XHTML root node must be a div"))
+		err.NewError(xmlutils.NewError(XHTMLRootNodeNotDiv, "Inline XHTML root node must be a div"))
 	}
 
 	if i.completed == true {
-		err.NewError(utils.NewError(NotUniqueChild, "Inline XHTML should be contained in a unique node"))
+		err.NewError(xmlutils.NewError(NotUniqueChild, "Inline XHTML should be contained in a unique node"))
 	}
 
 	i.depth.Down()
@@ -73,18 +73,18 @@ func (i *InlineXHTMLContent) ProcessStartElement(el utils.StartElement) (utils.V
 		err.NewError(error)
 	}
 	if error := i.EncodeXHTMLToken(el); error != nil {
-		err.NewError(utils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML"))
+		err.NewError(xmlutils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML"))
 	}
 
 	return i, err.ErrorObject()
 }
 
-func (i *InlineXHTMLContent) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (i *InlineXHTMLContent) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	level := i.depth.Up()
-	if level == utils.RootLevel {
+	if level == xmlutils.RootLevel {
 
 		if err := i.EncodeXHTMLToken(el); err != nil {
-			return i, utils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
+			return i, xmlutils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
 		}
 
 		if err := i.flush(); err != nil {
@@ -96,7 +96,7 @@ func (i *InlineXHTMLContent) ProcessEndElement(el xml.EndElement) (utils.Visitor
 		return i, nil
 	}
 
-	if level == utils.ParentLevel {
+	if level == xmlutils.ParentLevel {
 		if err := i.flush(); err != nil {
 			return i.Parent, err
 		}
@@ -108,35 +108,35 @@ func (i *InlineXHTMLContent) ProcessEndElement(el xml.EndElement) (utils.Visitor
 	}
 
 	if err := i.EncodeXHTMLToken(el); err != nil {
-		return i, utils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
+		return i, xmlutils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
 	}
 
 	return i, nil
 }
 
-func (i *InlineXHTMLContent) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (i *InlineXHTMLContent) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	if len(strings.Fields(string(el))) > 0 {
 		if err := i.flush(); err != nil {
 			return i, err
 		}
 
 		if _, err := i.Content.Write(el); err != nil {
-			return i, utils.NewError(CannotFlush, "cannot flush content")
+			return i, xmlutils.NewError(CannotFlush, "cannot flush content")
 		}
 
 		if i.depth.Level == 0 {
-			return i, utils.NewError(XHTMLRootNodeNotDiv, "XHTML element should have a root")
+			return i, xmlutils.NewError(XHTMLRootNodeNotDiv, "XHTML element should have a root")
 		}
 	}
 
 	return i, nil
 }
 
-func (i *InlineXHTMLContent) flush() utils.ParserError {
+func (i *InlineXHTMLContent) flush() xmlutils.ParserError {
 	err := i.Encoder.Flush()
 
 	if err != nil {
-		return utils.NewError(CannotFlush, "cannot flush XHTML")
+		return xmlutils.NewError(CannotFlush, "cannot flush XHTML")
 	}
 	return nil
 }

@@ -3,18 +3,18 @@ package extension
 import (
 	"encoding/xml"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type BasicAttr struct {
 	Content   string
 	name      xml.Name
-	Validator utils.ElementValidator
+	Validator xmlutils.ElementValidator
 
-	Parent utils.Visitor
+	Parent xmlutils.Visitor
 }
 
-func NewBasicAttr(name xml.Name, validator utils.ElementValidator) BasicAttr {
+func NewBasicAttr(name xml.Name, validator xmlutils.ElementValidator) BasicAttr {
 	return BasicAttr{name: name, Validator: validator}
 }
 
@@ -30,11 +30,11 @@ func (b *BasicAttr) Set(s string) {
 	b.Content = s
 }
 
-func (b *BasicAttr) SetParent(parent utils.Visitor) {
+func (b *BasicAttr) SetParent(parent xmlutils.Visitor) {
 	b.Parent = parent
 }
 
-func (b *BasicAttr) Validate() utils.ParserError {
+func (b *BasicAttr) Validate() xmlutils.ParserError {
 
 	if b.Validator == nil {
 		return nil

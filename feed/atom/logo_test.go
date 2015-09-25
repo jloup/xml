@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestLogo(iri string) *Logo {
@@ -23,11 +23,11 @@ func LogoWithBaseLang(l *Logo, lang, base string) *Logo {
 
 type testLogo struct {
 	XML           string
-	ExpectedError utils.ParserError
+	ExpectedError xmlutils.ParserError
 	ExpectedLogo  *Logo
 }
 
-func testLogoValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testLogoValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	l1 := actual.(*Logo)
 	l2 := expected.(*Logo)
 
@@ -42,12 +42,12 @@ func testLogoValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testLogoConstructor() utils.Visitor {
+func testLogoConstructor() xmlutils.Visitor {
 	return NewLogo()
 }
 
-func testLogoToTestVisitor(t testLogo) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func testLogoToTestVisitor(t testLogo) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedLogo,
@@ -74,7 +74,7 @@ func TestLogoBasic(t *testing.T) {
 			NewTestLogo("https://www.yo.com"),
 		},
 		{`<logo>https://www.%yo.com</logo>`,
-			utils.NewError(IriNotValid, ""),
+			xmlutils.NewError(IriNotValid, ""),
 			NewTestLogo("https://www.%yo.com"),
 		},
 	}

@@ -3,40 +3,40 @@ package rss
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Cloud struct {
-	Domain            utils.Element
-	Port              utils.Element
-	Path              utils.Element
-	RegisterProcedure utils.Element
-	Protocol          utils.Element
+	Domain            xmlutils.Element
+	Port              xmlutils.Element
+	Path              xmlutils.Element
+	RegisterProcedure xmlutils.Element
+	Protocol          xmlutils.Element
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewCloud() *Cloud {
-	c := Cloud{depth: utils.NewDepthWatcher()}
+	c := Cloud{depth: xmlutils.NewDepthWatcher()}
 
-	c.Domain = utils.NewElement("domain", "", utils.Nop)
-	c.Domain.SetOccurence(utils.NewOccurence("domain", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Domain = xmlutils.NewElement("domain", "", xmlutils.Nop)
+	c.Domain.SetOccurence(xmlutils.NewOccurence("domain", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Port = utils.NewElement("port", "", utils.Nop)
-	c.Port.SetOccurence(utils.NewOccurence("port", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Port = xmlutils.NewElement("port", "", xmlutils.Nop)
+	c.Port.SetOccurence(xmlutils.NewOccurence("port", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Path = utils.NewElement("path", "", utils.Nop)
-	c.Path.SetOccurence(utils.NewOccurence("path", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Path = xmlutils.NewElement("path", "", xmlutils.Nop)
+	c.Path.SetOccurence(xmlutils.NewOccurence("path", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.RegisterProcedure = utils.NewElement("registerProcedure", "", utils.Nop)
-	c.RegisterProcedure.SetOccurence(utils.NewOccurence("registerProcedure", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.RegisterProcedure = xmlutils.NewElement("registerProcedure", "", xmlutils.Nop)
+	c.RegisterProcedure.SetOccurence(xmlutils.NewOccurence("registerProcedure", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	c.Protocol = utils.NewElement("protocol", "", utils.Nop)
-	c.Protocol.SetOccurence(utils.NewOccurence("protocol", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	c.Protocol = xmlutils.NewElement("protocol", "", xmlutils.Nop)
+	c.Protocol.SetOccurence(xmlutils.NewOccurence("protocol", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
 	return &c
 }
@@ -57,7 +57,7 @@ func (c *Cloud) reset() {
 	c.Protocol.Reset()
 }
 
-func (c *Cloud) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (c *Cloud) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if c.depth.IsRoot() {
 		c.reset()
 		for _, attr := range el.Attr {
@@ -95,22 +95,22 @@ func (c *Cloud) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils
 	return c, nil
 }
 
-func (c *Cloud) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if c.depth.Up() == utils.RootLevel {
+func (c *Cloud) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if c.depth.Up() == xmlutils.RootLevel {
 		return c.Parent, c.validate()
 	}
 
 	return c, nil
 }
 
-func (c *Cloud) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (c *Cloud) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return c, nil
 }
 
-func (c *Cloud) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (c *Cloud) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("cloud", &error, c.Domain, c.Port, c.Path, c.RegisterProcedure, c.Protocol)
+	xmlutils.ValidateElements("cloud", &error, c.Domain, c.Port, c.Path, c.RegisterProcedure, c.Protocol)
 	c.Extension.Validate(&error)
 
 	return error.ErrorObject()

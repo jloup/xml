@@ -5,34 +5,34 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/xml/utils"
+	"github.com/jloup/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type InlineOtherContent struct {
-	Type    utils.Element
+	Type    xmlutils.Element
 	Content *bytes.Buffer
 
 	Encoder  *xml.Encoder
 	hasChild bool
 
-	Parent utils.Visitor
-	depth  utils.DepthWatcher
+	Parent xmlutils.Visitor
+	depth  xmlutils.DepthWatcher
 }
 
 func NewInlineOtherContent() *InlineOtherContent {
 	i := InlineOtherContent{hasChild: false}
 
-	i.Type = utils.NewElement("type", "", IsValidMIME)
-	i.Type.SetOccurence(utils.NewOccurence("type", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	i.Type = xmlutils.NewElement("type", "", IsValidMIME)
+	i.Type.SetOccurence(xmlutils.NewOccurence("type", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 	i.Content = &bytes.Buffer{}
 
 	i.Encoder = xml.NewEncoder(i.Content)
 	return &i
 }
 
-func (i *InlineOtherContent) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
-	err := errors.NewErrorAggregator()
+func (i *InlineOtherContent) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	err := utils.NewErrorAggregator()
 
 	if i.depth.IsRoot() {
 		for _, attr := range el.Attr {
@@ -46,7 +46,7 @@ func (i *InlineOtherContent) ProcessStartElement(el utils.StartElement) (utils.V
 
 	} else {
 		if error := i.Encoder.EncodeToken(el); error != nil {
-			err.NewError(utils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML"))
+			err.NewError(xmlutils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML"))
 		}
 		if i.depth.Level > 0 {
 			i.hasChild = true
@@ -58,35 +58,35 @@ func (i *InlineOtherContent) ProcessStartElement(el utils.StartElement) (utils.V
 	return i, nil
 }
 
-func (i *InlineOtherContent) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (i *InlineOtherContent) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	level := i.depth.Up()
 
-	if level == utils.RootLevel {
+	if level == xmlutils.RootLevel {
 		i.Encoder.Flush()
 		return i.Parent, i.validate()
 	}
 
 	if err := i.Encoder.EncodeToken(el); err != nil {
-		return i, utils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
+		return i, xmlutils.NewError(XHTMLEncodeToStringError, "cannot encode XHTML")
 	}
 
 	return i, nil
 }
 
-func (i *InlineOtherContent) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (i *InlineOtherContent) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	if len(strings.Fields(string(el))) > 0 {
 		i.Encoder.EncodeToken(el)
 	}
 	return i, nil
 }
 
-func (i *InlineOtherContent) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (i *InlineOtherContent) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("inlineothercontent", &error, i.Type)
+	xmlutils.ValidateElements("inlineothercontent", &error, i.Type)
 
 	if strings.HasPrefix(i.Type.Value, "text/") && i.hasChild {
-		error.NewError(utils.NewError(LeafElementHasChild, "text content should not have child"))
+		error.NewError(xmlutils.NewError(LeafElementHasChild, "text content should not have child"))
 	}
 
 	return error.ErrorObject()

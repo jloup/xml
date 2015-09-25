@@ -3,43 +3,43 @@ package thr
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/atom"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 var _inreplyto = xml.Name{Space: NS, Local: "in-reply-to"}
 
 type InReplyTo struct {
-	Ref    utils.Element
-	Href   utils.Element
-	Type   utils.Element
-	Source utils.Element
+	Ref    xmlutils.Element
+	Href   xmlutils.Element
+	Type   xmlutils.Element
+	Source xmlutils.Element
 
-	Parent utils.Visitor
-	depth  utils.DepthWatcher
+	Parent xmlutils.Visitor
+	depth  xmlutils.DepthWatcher
 }
 
 func newInReplyTo() *InReplyTo {
-	i := InReplyTo{depth: utils.NewDepthWatcher()}
+	i := InReplyTo{depth: xmlutils.NewDepthWatcher()}
 
-	i.Ref = utils.NewElement("ref", "", atom.IsAbsoluteIRI)
-	i.Ref.SetOccurence(utils.NewOccurence("ref", utils.ExistsAndUniqueValidator(atom.MissingAttribute, atom.AttributeDuplicated)))
+	i.Ref = xmlutils.NewElement("ref", "", atom.IsAbsoluteIRI)
+	i.Ref.SetOccurence(xmlutils.NewOccurence("ref", xmlutils.ExistsAndUniqueValidator(atom.MissingAttribute, atom.AttributeDuplicated)))
 
-	i.Href = utils.NewElement("href", "", atom.IsValidIRI)
-	i.Href.SetOccurence(utils.NewOccurence("href", utils.UniqueValidator(atom.AttributeDuplicated)))
+	i.Href = xmlutils.NewElement("href", "", atom.IsValidIRI)
+	i.Href.SetOccurence(xmlutils.NewOccurence("href", xmlutils.UniqueValidator(atom.AttributeDuplicated)))
 
-	i.Type = utils.NewElement("type", "", utils.Nop)
-	i.Type.SetOccurence(utils.NewOccurence("type", utils.UniqueValidator(atom.AttributeDuplicated)))
+	i.Type = xmlutils.NewElement("type", "", xmlutils.Nop)
+	i.Type.SetOccurence(xmlutils.NewOccurence("type", xmlutils.UniqueValidator(atom.AttributeDuplicated)))
 
-	i.Source = utils.NewElement("source", "", atom.IsValidIRI)
-	i.Source.SetOccurence(utils.NewOccurence("source", utils.UniqueValidator(atom.AttributeDuplicated)))
+	i.Source = xmlutils.NewElement("source", "", atom.IsValidIRI)
+	i.Source.SetOccurence(xmlutils.NewOccurence("source", xmlutils.UniqueValidator(atom.AttributeDuplicated)))
 
 	return &i
 }
 
-func (i *InReplyTo) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (i *InReplyTo) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if i.depth.Level == 0 {
 		for _, attr := range el.Attr {
 			switch attr.Name.Space {
@@ -71,22 +71,22 @@ func (i *InReplyTo) ProcessStartElement(el utils.StartElement) (utils.Visitor, u
 	return i, nil
 }
 
-func (i *InReplyTo) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if i.depth.Up() == utils.RootLevel {
+func (i *InReplyTo) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if i.depth.Up() == xmlutils.RootLevel {
 		return i.Parent, i.Validate()
 	}
 
 	return i, nil
 }
 
-func (i *InReplyTo) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (i *InReplyTo) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return i, nil
 }
 
-func (i *InReplyTo) Validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (i *InReplyTo) Validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("in-reply-to", &error, i.Ref, i.Href, i.Source, i.Type)
+	xmlutils.ValidateElements("in-reply-to", &error, i.Ref, i.Href, i.Source, i.Type)
 
 	return error.ErrorObject()
 }
@@ -103,6 +103,6 @@ func newInReplyToElement() extension.Element {
 	return newInReplyTo()
 }
 
-func (i *InReplyTo) SetParent(p utils.Visitor) {
+func (i *InReplyTo) SetParent(p xmlutils.Visitor) {
 	i.Parent = p
 }

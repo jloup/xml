@@ -3,27 +3,27 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/xml/utils"
+	"github.com/jloup/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type CommonAttributes struct {
-	Base utils.Element
-	Lang utils.Element
+	Base xmlutils.Element
+	Lang xmlutils.Element
 }
 
 func (c *CommonAttributes) InitCommonAttributes() {
-	c.Base = utils.NewElement("base", "", IsValidIRI)
-	c.Base.SetOccurence(utils.NewOccurence("base", utils.UniqueValidator(AttributeDuplicated)))
+	c.Base = xmlutils.NewElement("base", "", IsValidIRI)
+	c.Base.SetOccurence(xmlutils.NewOccurence("base", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	c.Lang = utils.NewElement("lang", "", utils.Nop)
-	c.Lang.SetOccurence(utils.NewOccurence("lang", utils.UniqueValidator(AttributeDuplicated)))
+	c.Lang = xmlutils.NewElement("lang", "", xmlutils.Nop)
+	c.Lang.SetOccurence(xmlutils.NewOccurence("lang", xmlutils.UniqueValidator(AttributeDuplicated)))
 
 }
 
 func (c *CommonAttributes) ProcessAttr(attr xml.Attr) bool {
 	switch attr.Name.Space {
-	case utils.XML_NS:
+	case xmlutils.XML_NS:
 		switch attr.Name.Local {
 
 		case "lang":
@@ -46,6 +46,6 @@ func (c *CommonAttributes) ResetAttr() {
 	c.Lang.Reset()
 }
 
-func (c *CommonAttributes) ValidateCommonAttributes(parentName string, errorAgg *errors.ErrorAggregator) {
-	utils.ValidateElements(parentName, errorAgg, c.Base, c.Lang)
+func (c *CommonAttributes) ValidateCommonAttributes(parentName string, errorAgg *utils.ErrorAggregator) {
+	xmlutils.ValidateElements(parentName, errorAgg, c.Base, c.Lang)
 }

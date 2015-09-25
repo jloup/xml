@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Date struct {
@@ -15,12 +15,12 @@ type Date struct {
 	RawContent string
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewDate() *Date {
-	d := Date{depth: utils.NewDepthWatcher()}
+	d := Date{depth: xmlutils.NewDepthWatcher()}
 
 	d.depth.SetMaxDepth(1)
 	return &d
@@ -34,27 +34,27 @@ func NewDateExt(manager extension.Manager) *Date {
 	return d
 }
 
-func (d *Date) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (d *Date) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if d.depth.IsRoot() {
 		for _, attr := range el.Attr {
 			d.Extension.ProcessAttr(attr, d)
 		}
 	}
 
-	if d.depth.Down() == utils.RootLevel {
-		return d.Parent, utils.NewError(LeafElementHasChild, "date construct shoud not have childs")
+	if d.depth.Down() == xmlutils.RootLevel {
+		return d.Parent, xmlutils.NewError(LeafElementHasChild, "date construct shoud not have childs")
 	}
 
 	return d, nil
 }
 
-func (d *Date) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (d *Date) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	return d.Parent, d.validate()
 }
 
 var rssDateFormat = []string{"Mon, 02 Jan 2006 15:04:05 MST", "Mon, _2 Jan 2006 15:04:05 -0700"}
 
-func (d *Date) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (d *Date) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	var err error
 
 	d.RawContent = string(el)
@@ -65,11 +65,11 @@ func (d *Date) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserErro
 		}
 	}
 
-	return d, utils.NewError(DateFormat, fmt.Sprintf("date not well formatted '%v'", string(el)))
+	return d, xmlutils.NewError(DateFormat, fmt.Sprintf("date not well formatted '%v'", string(el)))
 }
 
-func (d *Date) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (d *Date) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
 	d.Extension.Validate(&error)
 

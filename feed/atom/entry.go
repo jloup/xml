@@ -5,9 +5,9 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Entry struct {
@@ -26,9 +26,9 @@ type Entry struct {
 	Updated      *Date
 
 	Extension  extension.VisitorExtension
-	Occurences utils.OccurenceCollection
-	depth      utils.DepthWatcher
-	Parent     utils.Visitor
+	Occurences xmlutils.OccurenceCollection
+	depth      xmlutils.DepthWatcher
+	Parent     xmlutils.Visitor
 }
 
 func NewEntry() *Entry {
@@ -42,7 +42,7 @@ func NewEntry() *Entry {
 		Title:     NewTextConstruct(),
 		Updated:   NewDate(),
 
-		depth: utils.NewDepthWatcher(),
+		depth: xmlutils.NewDepthWatcher(),
 	}
 
 	e.init()
@@ -61,7 +61,7 @@ func NewEntryExt(manager extension.Manager) *Entry {
 		Title:     NewTextConstructExt(manager),
 		Updated:   NewDateExt(manager),
 
-		depth: utils.NewDepthWatcher(),
+		depth: xmlutils.NewDepthWatcher(),
 	}
 
 	e.init()
@@ -83,15 +83,15 @@ func (e *Entry) init() {
 
 	e.InitCommonAttributes()
 
-	e.Occurences = utils.NewOccurenceCollection(
-		utils.NewOccurence("content", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("id", utils.ExistsAndUniqueValidator(MissingId, IdDuplicated)),
-		utils.NewOccurence("published", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("rights", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("source", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("summary", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("title", utils.ExistsAndUniqueValidator(MissingTitle, TitleDuplicated)),
-		utils.NewOccurence("updated", utils.ExistsAndUniqueValidator(MissingDate, AttributeDuplicated)),
+	e.Occurences = xmlutils.NewOccurenceCollection(
+		xmlutils.NewOccurence("content", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("id", xmlutils.ExistsAndUniqueValidator(MissingId, IdDuplicated)),
+		xmlutils.NewOccurence("published", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("rights", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("source", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("summary", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("title", xmlutils.ExistsAndUniqueValidator(MissingTitle, TitleDuplicated)),
+		xmlutils.NewOccurence("updated", xmlutils.ExistsAndUniqueValidator(MissingDate, AttributeDuplicated)),
 	)
 
 }
@@ -101,7 +101,7 @@ func (e *Entry) reset() {
 	e.Occurences.Reset()
 }
 
-func (e *Entry) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (e *Entry) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if e.depth.IsRoot() {
 		e.reset()
 		for _, attr := range el.Attr {
@@ -179,29 +179,29 @@ func (e *Entry) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils
 	return e, nil
 }
 
-func (e *Entry) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if e.depth.Up() == utils.RootLevel {
+func (e *Entry) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if e.depth.Up() == xmlutils.RootLevel {
 		return e.Parent, e.validate()
 	}
 
 	return e, nil
 }
 
-func (e *Entry) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (e *Entry) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return e, nil
 }
 
-func (e *Entry) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (e *Entry) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
 	e.validateLinks(&error)
 	e.validateAuthors(&error)
-	utils.ValidateOccurenceCollection("entry", &error, e.Occurences)
+	xmlutils.ValidateOccurenceCollection("entry", &error, e.Occurences)
 	e.Extension.Validate(&error)
 	e.ValidateCommonAttributes("entry", &error)
 
 	if e.Occurences.Count("summary") == 0 && !e.Content.HasReadableContent() {
-		error.NewError(utils.NewError(MissingSummary, "Summary must be provided or Content must contain XML media type, XHTML or text"))
+		error.NewError(xmlutils.NewError(MissingSummary, "Summary must be provided or Content must contain XML media type, XHTML or text"))
 	}
 
 	return error.ErrorObject()
@@ -211,14 +211,14 @@ func (e *Entry) hasAuthor() bool {
 	return len(e.Authors) > 0 || e.Source.hasAuthor()
 }
 
-func (e *Entry) validateAuthors(err *errors.ErrorAggregator) {
+func (e *Entry) validateAuthors(err *utils.ErrorAggregator) {
 	if e.Parent == nil && !e.hasAuthor() {
-		err.NewError(utils.NewError(MissingAuthor, "entry should contain at least one author"))
+		err.NewError(xmlutils.NewError(MissingAuthor, "entry should contain at least one author"))
 	}
 
 }
 
-func (e *Entry) validateLinks(err *errors.ErrorAggregator) {
+func (e *Entry) validateLinks(err *utils.ErrorAggregator) {
 	combinations := make([]string, 0)
 	hasAlternateRel := false
 
@@ -230,7 +230,7 @@ func (e *Entry) validateLinks(err *errors.ErrorAggregator) {
 
 			for _, comb := range combinations {
 				if s == comb {
-					err.NewError(utils.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
+					err.NewError(xmlutils.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
 					unique = false
 				}
 			}
@@ -242,6 +242,6 @@ func (e *Entry) validateLinks(err *errors.ErrorAggregator) {
 	}
 
 	if e.Occurences.Count("content") == 0 && !hasAlternateRel {
-		err.NewError(utils.NewError(NoContentOrAlternateLink, "Entry should have either a Content element or a Link with alternate type"))
+		err.NewError(xmlutils.NewError(NoContentOrAlternateLink, "Entry should have either a Content element or a Link with alternate type"))
 	}
 }

@@ -3,9 +3,9 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Person struct {
@@ -16,12 +16,12 @@ type Person struct {
 
 	name      string
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewPerson() *Person {
-	p := Person{depth: utils.NewDepthWatcher()}
+	p := Person{depth: xmlutils.NewDepthWatcher()}
 
 	p.Name = NewBasicElement(&p)
 	p.Uri = NewBasicElement(&p)
@@ -33,7 +33,7 @@ func NewPerson() *Person {
 }
 
 func NewPersonExt(manager extension.Manager) *Person {
-	p := Person{depth: utils.NewDepthWatcher()}
+	p := Person{depth: xmlutils.NewDepthWatcher()}
 
 	p.Name = NewBasicElementExt(&p, manager)
 	p.Uri = NewBasicElementExt(&p, manager)
@@ -48,14 +48,14 @@ func NewPersonExt(manager extension.Manager) *Person {
 
 func (p *Person) init() {
 
-	p.Name.Content = utils.NewElement("name", "", utils.Nop)
-	p.Name.Content.SetOccurence(utils.NewOccurence("name", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	p.Name.Content = xmlutils.NewElement("name", "", xmlutils.Nop)
+	p.Name.Content.SetOccurence(xmlutils.NewOccurence("name", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	p.Uri.Content = utils.NewElement("uri", "", IsValidIRI)
-	p.Uri.Content.SetOccurence(utils.NewOccurence("uri", utils.UniqueValidator(AttributeDuplicated)))
+	p.Uri.Content = xmlutils.NewElement("uri", "", IsValidIRI)
+	p.Uri.Content.SetOccurence(xmlutils.NewOccurence("uri", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	p.Email.Content = utils.NewElement("email", "", utils.Nop)
-	p.Email.Content.SetOccurence(utils.NewOccurence("email", utils.UniqueValidator(AttributeDuplicated)))
+	p.Email.Content = xmlutils.NewElement("email", "", xmlutils.Nop)
+	p.Email.Content.SetOccurence(xmlutils.NewOccurence("email", xmlutils.UniqueValidator(AttributeDuplicated)))
 
 	p.InitCommonAttributes()
 
@@ -68,7 +68,7 @@ func (p *Person) reset() {
 	p.Email.Content.Reset()
 }
 
-func (p *Person) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (p *Person) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if p.depth.IsRoot() {
 		p.reset()
 		p.name = el.Name.Local
@@ -106,8 +106,8 @@ func (p *Person) ProcessStartElement(el utils.StartElement) (utils.Visitor, util
 	return p, nil
 }
 
-func (p *Person) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if p.depth.Up() == utils.RootLevel {
+func (p *Person) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if p.depth.Up() == xmlutils.RootLevel {
 
 		return p.Parent, p.validate()
 	}
@@ -115,15 +115,15 @@ func (p *Person) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.Pars
 	return p, nil
 }
 
-func (p *Person) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (p *Person) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return p, nil
 }
 
-func (p *Person) validate() utils.ParserError {
+func (p *Person) validate() xmlutils.ParserError {
 
-	error := errors.NewErrorAggregator()
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateOccurences(p.name, &error, p.Name.Content.Occurence, p.Uri.Content.Occurence, p.Email.Content.Occurence)
+	xmlutils.ValidateOccurences(p.name, &error, p.Name.Content.Occurence, p.Uri.Content.Occurence, p.Email.Content.Occurence)
 	p.ValidateCommonAttributes(p.name, &error)
 	p.Extension.Validate(&error)
 

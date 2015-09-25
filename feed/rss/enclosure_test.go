@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -18,11 +18,11 @@ func NewTestEnclosure(url, length, typ string) *Enclosure {
 
 type testEnclosure struct {
 	XML               string
-	ExpectedError     utils.ParserError
+	ExpectedError     xmlutils.ParserError
 	ExpectedEnclosure *Enclosure
 }
 
-func testEnclosureValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testEnclosureValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	e1 := actual.(*Enclosure)
 	e2 := expected.(*Enclosure)
 
@@ -40,12 +40,12 @@ func testEnclosureValidator(actual utils.Visitor, expected utils.Visitor) error 
 	return nil
 }
 
-func testEnclosureConstructor() utils.Visitor {
+func testEnclosureConstructor() xmlutils.Visitor {
 	return NewEnclosure()
 }
 
-func _TestEnclosureToTestVisitor(t testEnclosure) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func _TestEnclosureToTestVisitor(t testEnclosure) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedEnclosure,
@@ -67,15 +67,15 @@ func TestEnclosureBasic(t *testing.T) {
 			NewTestEnclosure("http://www.scripting.com/mp3s/weatherReportSuite.mp3", "12216320", "audio/mpeg"),
 		},
 		{`<enclosure length="12216320" type="audio/mpeg" />`,
-			utils.NewError(MissingAttribute, ""),
+			xmlutils.NewError(MissingAttribute, ""),
 			NewTestEnclosure("", "12216320", "audio/mpeg"),
 		},
 		{`<enclosure url="http://www.scripting.com/mp3s/weatherReportSuite.mp3" type="audio/mpeg" />`,
-			utils.NewError(MissingAttribute, ""),
+			xmlutils.NewError(MissingAttribute, ""),
 			NewTestEnclosure("http://www.scripting.com/mp3s/weatherReportSuite.mp3", "", "audio/mpeg"),
 		},
 		{`<enclosure url="http://www.scripting.com/mp3s/weatherReportSuite.mp3" length="12216320" />`,
-			utils.NewError(MissingAttribute, ""),
+			xmlutils.NewError(MissingAttribute, ""),
 			NewTestEnclosure("http://www.scripting.com/mp3s/weatherReportSuite.mp3", "12216320", ""),
 		},
 	}

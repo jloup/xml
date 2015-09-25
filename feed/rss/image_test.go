@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -21,11 +21,11 @@ func NewTestImage(url, title, link, width, height, description string) *Image {
 
 type testImage struct {
 	XML           string
-	ExpectedError utils.ParserError
+	ExpectedError xmlutils.ParserError
 	ExpectedImage *Image
 }
 
-func testImageValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testImageValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	i1 := actual.(*Image)
 	i2 := expected.(*Image)
 
@@ -56,12 +56,12 @@ func testImageValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testImageConstructor() utils.Visitor {
+func testImageConstructor() xmlutils.Visitor {
 	return NewImage()
 }
 
-func _TestImageToTestVisitor(t testImage) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func _TestImageToTestVisitor(t testImage) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedImage,
@@ -97,7 +97,7 @@ var testdata = []testImage{
            <height>31</height>
            <description>News for web users that write back</description>
           </image>`,
-		utils.NewError(MissingAttribute, ""),
+		xmlutils.NewError(MissingAttribute, ""),
 		NewTestImage("http://writetheweb.com/images/mynetscape88.gif", "", "http://writetheweb.com", "88", "31", "News for web users that write back"),
 	},
 	{`
@@ -108,7 +108,7 @@ var testdata = []testImage{
            <height>31</height>
            <description>News for web users that write back</description>
           </image>`,
-		utils.NewError(MissingAttribute, ""),
+		xmlutils.NewError(MissingAttribute, ""),
 		NewTestImage("", "WriteTheWeb", "http://writetheweb.com", "88", "31", "News for web users that write back"),
 	},
 	{`
@@ -119,7 +119,7 @@ var testdata = []testImage{
            <height>31</height>
            <description>News for web users that write back</description>
           </image>`,
-		utils.NewError(MissingAttribute, ""),
+		xmlutils.NewError(MissingAttribute, ""),
 		NewTestImage("http://writetheweb.com/images/mynetscape88.gif", "WriteTheWeb", "", "88", "31", "News for web users that write back"),
 	},
 	{`

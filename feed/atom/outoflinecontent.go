@@ -3,32 +3,32 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/xml/utils"
+	"github.com/jloup/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type OutOfLineContent struct {
-	Type utils.Element
-	Src  utils.Element
+	Type xmlutils.Element
+	Src  xmlutils.Element
 
-	Parent utils.Visitor
-	depth  utils.DepthWatcher
+	Parent xmlutils.Visitor
+	depth  xmlutils.DepthWatcher
 }
 
 func NewOutOfLineContent() *OutOfLineContent {
-	o := OutOfLineContent{depth: utils.NewDepthWatcher()}
+	o := OutOfLineContent{depth: xmlutils.NewDepthWatcher()}
 
-	o.Type = utils.NewElement("type", "", outOfLineTypeIsValid)
-	o.Type.SetOccurence(utils.NewOccurence("type", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	o.Type = xmlutils.NewElement("type", "", outOfLineTypeIsValid)
+	o.Type.SetOccurence(xmlutils.NewOccurence("type", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	o.Src = utils.NewElement("src", "", IsValidIRI)
-	o.Src.SetOccurence(utils.NewOccurence("src", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	o.Src = xmlutils.NewElement("src", "", IsValidIRI)
+	o.Src.SetOccurence(xmlutils.NewOccurence("src", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
 	o.depth.SetMaxDepth(1)
 	return &o
 }
 
-func outOfLineTypeIsValid(name, s string) utils.ParserError {
+func outOfLineTypeIsValid(name, s string) xmlutils.ParserError {
 	if err := IsValidMIME(name, s); err != nil {
 		return err
 	}
@@ -41,9 +41,9 @@ func outOfLineTypeIsValid(name, s string) utils.ParserError {
 
 }
 
-func (o *OutOfLineContent) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
-	if o.depth.Down() == utils.MaxDepthReached {
-		return o, utils.NewError(SourcedContentElementNotEmpty, "content element should be empty")
+func (o *OutOfLineContent) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if o.depth.Down() == xmlutils.MaxDepthReached {
+		return o, xmlutils.NewError(SourcedContentElementNotEmpty, "content element should be empty")
 	}
 
 	for _, attr := range el.Attr {
@@ -64,22 +64,22 @@ func (o *OutOfLineContent) ProcessStartElement(el utils.StartElement) (utils.Vis
 	return o, nil
 }
 
-func (o *OutOfLineContent) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (o *OutOfLineContent) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 
-	if o.depth.Up() == utils.RootLevel {
+	if o.depth.Up() == xmlutils.RootLevel {
 		return o.Parent, o.validate()
 	}
 	return o, nil
 }
 
-func (o *OutOfLineContent) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
-	return o, utils.NewError(SourcedContentElementNotEmpty, "content element should be empty")
+func (o *OutOfLineContent) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
+	return o, xmlutils.NewError(SourcedContentElementNotEmpty, "content element should be empty")
 }
 
-func (o *OutOfLineContent) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (o *OutOfLineContent) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("out of line", &error, o.Type, o.Src)
+	xmlutils.ValidateElements("out of line", &error, o.Type, o.Src)
 
 	return error.ErrorObject()
 }

@@ -7,41 +7,40 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/flag"
+	"github.com/jloup/utils"
 )
 
 type Valider interface {
 	Validate() ParserError
 }
 
-func ValidateOccurenceCollection(parentName string, agg *errors.ErrorAggregator, collection OccurenceCollection) {
+func ValidateOccurenceCollection(parentName string, agg *utils.ErrorAggregator, collection OccurenceCollection) {
 	for _, occ := range collection.Occurences {
 		ValidateElement(parentName, occ, agg)
 	}
 
 }
 
-func ValidateOccurences(parentName string, agg *errors.ErrorAggregator, collection ...*Occurence) {
+func ValidateOccurences(parentName string, agg *utils.ErrorAggregator, collection ...*Occurence) {
 	for _, occ := range collection {
 		ValidateElement(parentName, occ, agg)
 	}
 
 }
 
-func ValidateElement(parentName string, el Valider, agg *errors.ErrorAggregator) {
+func ValidateElement(parentName string, el Valider, agg *utils.ErrorAggregator) {
 	if err := el.Validate(); err != nil {
 		agg.NewError(NewError(err.Flag(), fmt.Sprintf("%s's %s", parentName, err.Msg())))
 	}
 }
 
-func ValidateElements(parentName string, agg *errors.ErrorAggregator, els ...Valider) {
+func ValidateElements(parentName string, agg *utils.ErrorAggregator, els ...Valider) {
 	for _, el := range els {
 		ValidateElement(parentName, el, agg)
 	}
 }
 
-func ExistsValidator(f flag.Flag) func(*Occurence) ParserError {
+func ExistsValidator(f utils.Flag) func(*Occurence) ParserError {
 	return func(o *Occurence) ParserError {
 		if o.NbOccurences == 0 {
 			return NewError(f, fmt.Sprintf("%s should exist", o.Name))
@@ -53,7 +52,7 @@ func ExistsValidator(f flag.Flag) func(*Occurence) ParserError {
 
 }
 
-func UniqueValidator(f flag.Flag) func(*Occurence) ParserError {
+func UniqueValidator(f utils.Flag) func(*Occurence) ParserError {
 	return func(o *Occurence) ParserError {
 		if o.NbOccurences > 1 {
 			return NewError(f, fmt.Sprintf("%s should be unique", o.Name))
@@ -62,7 +61,7 @@ func UniqueValidator(f flag.Flag) func(*Occurence) ParserError {
 	}
 }
 
-func ExistsAndUniqueValidator(fe, fu flag.Flag) func(*Occurence) ParserError {
+func ExistsAndUniqueValidator(fe, fu utils.Flag) func(*Occurence) ParserError {
 	existsV := ExistsValidator(fe)
 	uniqueV := UniqueValidator(fu)
 	return func(o *Occurence) ParserError {
@@ -76,7 +75,7 @@ func ExistsAndUniqueValidator(fe, fu flag.Flag) func(*Occurence) ParserError {
 	}
 }
 
-func IsValidIri(f flag.Flag) func(string, string) ParserError {
+func IsValidIri(f utils.Flag) func(string, string) ParserError {
 	return func(name, s string) ParserError {
 		_, err := url.Parse(s)
 
@@ -88,7 +87,7 @@ func IsValidIri(f flag.Flag) func(string, string) ParserError {
 	}
 }
 
-func IsValidAbsoluteIri(f flag.Flag) func(string, string) ParserError {
+func IsValidAbsoluteIri(f utils.Flag) func(string, string) ParserError {
 	return func(name, s string) ParserError {
 		u, err := url.Parse(s)
 
@@ -107,7 +106,7 @@ func Nop(name, s string) ParserError {
 	return nil
 }
 
-func IsValidNumber(f flag.Flag) func(string, string) ParserError {
+func IsValidNumber(f utils.Flag) func(string, string) ParserError {
 	return func(name, s string) ParserError {
 		n, err := strconv.Atoi(s)
 
@@ -122,7 +121,7 @@ func IsValidNumber(f flag.Flag) func(string, string) ParserError {
 	}
 }
 
-func IsValidMIME(f flag.Flag) func(string, string) ParserError {
+func IsValidMIME(f utils.Flag) func(string, string) ParserError {
 	return func(name, s string) ParserError {
 
 		sL := strings.ToLower(s)
@@ -142,7 +141,7 @@ func IsValidMIME(f flag.Flag) func(string, string) ParserError {
 	}
 }
 
-func IsValidXMLMediaType(f flag.Flag) func(string, string) ParserError {
+func IsValidXMLMediaType(f utils.Flag) func(string, string) ParserError {
 	return func(name, s string) ParserError {
 		sL := strings.ToLower(s)
 		if strings.HasSuffix(sL, "+xml") || strings.HasSuffix(sL, "/xml") {

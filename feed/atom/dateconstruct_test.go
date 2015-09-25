@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestDate(date string) *Date {
@@ -24,11 +24,11 @@ func DateWithBaseLang(date *Date, lang, base string) *Date {
 
 type testDate struct {
 	XML           string
-	ExpectedError utils.ParserError
+	ExpectedError xmlutils.ParserError
 	ExpectedDate  *Date
 }
 
-func testDateValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testDateValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	d1 := actual.(*Date)
 	d2 := expected.(*Date)
 
@@ -43,12 +43,12 @@ func testDateValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testDateConstructor() utils.Visitor {
+func testDateConstructor() xmlutils.Visitor {
 	return NewDate()
 }
 
-func testDateToTestVisitor(t testDate) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func testDateToTestVisitor(t testDate) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedDate,
@@ -87,11 +87,11 @@ func TestDateBasic(t *testing.T) {
 			NewTestDate("2003-12-13T18:30:02.25+01:00"),
 		},
 		{`<updated>2003-12-13t18:30:02z</updated>`,
-			utils.NewError(DateFormat, ""),
+			xmlutils.NewError(DateFormat, ""),
 			NewTestDate("0"),
 		},
 		{`<updated>2003-12-13T18:30:02.25</updated>`,
-			utils.NewError(DateFormat, ""),
+			xmlutils.NewError(DateFormat, ""),
 			NewTestDate("0"),
 		},
 	}

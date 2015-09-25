@@ -3,36 +3,36 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type InlineTextContent struct {
 	Content string
 
-	depth  utils.DepthWatcher
-	Parent utils.Visitor
+	depth  xmlutils.DepthWatcher
+	Parent xmlutils.Visitor
 }
 
 func NewInlineTextContent() *InlineTextContent {
-	d := utils.NewDepthWatcher()
+	d := xmlutils.NewDepthWatcher()
 
 	return &InlineTextContent{depth: d}
 }
 
-func (i *InlineTextContent) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (i *InlineTextContent) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	i.depth.Down()
-	return i, utils.NewError(LeafElementHasChild, "inline text shoud not contain XML childs")
+	return i, xmlutils.NewError(LeafElementHasChild, "inline text shoud not contain XML childs")
 }
 
-func (i *InlineTextContent) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if i.depth.Up() == utils.ParentLevel {
+func (i *InlineTextContent) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if i.depth.Up() == xmlutils.ParentLevel {
 		return i.Parent.ProcessEndElement(el)
 	}
 
 	return i, nil
 }
 
-func (i *InlineTextContent) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (i *InlineTextContent) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	i.Content = string(el)
 	return i, nil
 }

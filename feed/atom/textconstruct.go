@@ -3,9 +3,9 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type TextConstruct struct {
@@ -16,7 +16,7 @@ type TextConstruct struct {
 	PlainText *InlineTextContent
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
+	Parent    xmlutils.Visitor
 }
 
 func NewTextConstruct() *TextConstruct {
@@ -41,14 +41,14 @@ func (t *TextConstruct) reset() {
 	t.Type = "text"
 }
 
-func (t *TextConstruct) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (t *TextConstruct) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	t.name = el.Name.Local
 	t.Extension = extension.InitExtension(t.name, t.Extension.Manager)
 	t.reset()
 
 	for _, attr := range el.Attr {
 		switch attr.Name.Space {
-		case utils.XML_NS:
+		case xmlutils.XML_NS:
 			t.ProcessAttr(attr)
 
 		case "":
@@ -74,19 +74,19 @@ func (t *TextConstruct) ProcessStartElement(el utils.StartElement) (utils.Visito
 	return t.PlainText, nil
 }
 
-func (t *TextConstruct) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
+func (t *TextConstruct) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	return t.Parent, t.Validate()
 }
 
-func (t *TextConstruct) Validate() utils.ParserError {
-	err := errors.NewErrorAggregator()
+func (t *TextConstruct) Validate() xmlutils.ParserError {
+	err := utils.NewErrorAggregator()
 
 	t.ValidateCommonAttributes(t.name, &err)
 
 	return err.ErrorObject()
 }
 
-func (t *TextConstruct) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (t *TextConstruct) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return t, nil
 }
 

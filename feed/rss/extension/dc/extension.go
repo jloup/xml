@@ -4,13 +4,13 @@ package dc
 import (
 	"github.com/jloup/xml/feed/extension"
 	"github.com/jloup/xml/feed/rss"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 const NS = "http://purl.org/dc/elements/1.1/"
 
 func AddToManager(manager *extension.Manager) {
-	manager.AddElementExtension("item", CREATOR, NewCreatorElement, utils.UniqueValidator(rss.AttributeDuplicated))
+	manager.AddElementExtension("item", CREATOR, NewCreatorElement, xmlutils.UniqueValidator(rss.AttributeDuplicated))
 
 }
 

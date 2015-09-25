@@ -3,8 +3,8 @@ package extension
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
-	"github.com/jloup/xml/utils"
+	"github.com/jloup/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type VisitorExtension struct {
@@ -24,7 +24,7 @@ func InitExtension(name string, manager Manager) VisitorExtension {
 	return v
 }
 
-func (v *VisitorExtension) ProcessElement(el utils.StartElement, parent utils.Visitor) (utils.Visitor, utils.ParserError) {
+func (v *VisitorExtension) ProcessElement(el xmlutils.StartElement, parent xmlutils.Visitor) (xmlutils.Visitor, xmlutils.ParserError) {
 	if constructor := v.Repository.GetElement(el.Name); constructor == nil {
 		return nil, nil
 
@@ -40,7 +40,7 @@ func (v *VisitorExtension) ProcessElement(el utils.StartElement, parent utils.Vi
 
 }
 
-func (v *VisitorExtension) ProcessAttr(attr xml.Attr, parent utils.Visitor) {
+func (v *VisitorExtension) ProcessAttr(attr xml.Attr, parent xmlutils.Visitor) {
 	if constructor := v.Repository.GetAttr(attr.Name); constructor != nil {
 		ext := constructor()
 		ext.SetParent(parent)
@@ -49,7 +49,7 @@ func (v *VisitorExtension) ProcessAttr(attr xml.Attr, parent utils.Visitor) {
 	}
 }
 
-func (v *VisitorExtension) Validate(errorAgg *errors.ErrorAggregator) {
-	utils.ValidateOccurenceCollection(v.name, errorAgg, v.Store.Occ)
+func (v *VisitorExtension) Validate(errorAgg *utils.ErrorAggregator) {
+	xmlutils.ValidateOccurenceCollection(v.name, errorAgg, v.Store.Occ)
 	v.Store.Validate(errorAgg)
 }

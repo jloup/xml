@@ -8,7 +8,7 @@ import (
 	"github.com/jloup/xml/feed/atom"
 
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func ExampleParse() {
@@ -47,7 +47,7 @@ func ExampleParseOptions() {
 	}
 
 	// the input feed should be 100% compliant to spec...
-	flags := utils.NewErrorChecker(utils.EnableAllError)
+	flags := xmlutils.NewErrorChecker(xmlutils.EnableAllError)
 
 	//... but it is OK if Atom entry does not have <updated> field
 	flags.DisableErrorChecking("entry", atom.MissingDate)

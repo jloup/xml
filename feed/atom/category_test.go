@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func ValidateBaseLang(name, base, lang, eBase, eLang string) error {
@@ -37,11 +37,11 @@ func CategoryWithBaseLang(c *Category, lang, base string) *Category {
 
 type testCategory struct {
 	XML              string
-	ExpectedError    utils.ParserError
+	ExpectedError    xmlutils.ParserError
 	ExpectedCategory *Category
 }
 
-func testCategoryValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testCategoryValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	c1 := actual.(*Category)
 	c2 := expected.(*Category)
 
@@ -64,12 +64,12 @@ func testCategoryValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testCategoryConstructor() utils.Visitor {
+func testCategoryConstructor() xmlutils.Visitor {
 	return NewCategory()
 }
 
-func testCategoryToTestVisitor(t testCategory) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func testCategoryToTestVisitor(t testCategory) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedCategory,
@@ -97,7 +97,7 @@ func TestCategoryBasic(t *testing.T) {
 			NewTestCategory("https://www.yo.com", "music", ""),
 		},
 		{`<category scheme='https://www.tbray.org/ongoing/What/' />`,
-			utils.NewError(MissingAttribute, ""),
+			xmlutils.NewError(MissingAttribute, ""),
 			NewTestCategory("https://www.tbray.org/ongoing/What/", "", ""),
 		},
 		{`<category term="music" label='house' />`,
@@ -105,7 +105,7 @@ func TestCategoryBasic(t *testing.T) {
 			NewTestCategory("", "music", "house"),
 		},
 		{`<category term="music" label='house' scheme='http://www.%scheme.com'/>`,
-			utils.NewError(IriNotValid, ""),
+			xmlutils.NewError(IriNotValid, ""),
 			NewTestCategory("http://www.%scheme.com", "music", "house"),
 		},
 	}

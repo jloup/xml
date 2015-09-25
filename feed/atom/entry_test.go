@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 func NewTestEntry(
@@ -47,11 +47,11 @@ func EntryWithBaseLang(e *Entry, lang, base string) *Entry {
 
 type testEntry struct {
 	XML           string
-	ExpectedError utils.ParserError
+	ExpectedError xmlutils.ParserError
 	ExpectedEntry *Entry
 }
 
-func testEntryValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testEntryValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	e1 := actual.(*Entry)
 	e2 := expected.(*Entry)
 
@@ -138,12 +138,12 @@ func testEntryValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testEntryConstructor() utils.Visitor {
+func testEntryConstructor() xmlutils.Visitor {
 	return NewEntry()
 }
 
-func _TestEntryToTestVisitor(t testEntry) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func _TestEntryToTestVisitor(t testEntry) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedEntry,
@@ -244,7 +244,7 @@ func TestEntryBasic(t *testing.T) {
        <summary>Some text.</summary>
      </entry>
 `,
-			utils.NewError(MissingTitle, ""),
+			xmlutils.NewError(MissingTitle, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -310,7 +310,7 @@ func TestEntryBasic(t *testing.T) {
       <content>SECOND CONTENT</content>
      </entry>
 `,
-			utils.NewError(AttributeDuplicated, ""),
+			xmlutils.NewError(AttributeDuplicated, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -341,7 +341,7 @@ func TestEntryBasic(t *testing.T) {
       <updated>2005-07-31T12:29:29Z</updated>
      </entry>
 `,
-			utils.NewError(MissingId, ""),
+			xmlutils.NewError(MissingId, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -374,7 +374,7 @@ func TestEntryBasic(t *testing.T) {
       <summary>Some text.</summary>
      </entry>
 `,
-			utils.NewError(IdDuplicated, ""),
+			xmlutils.NewError(IdDuplicated, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -407,7 +407,7 @@ func TestEntryBasic(t *testing.T) {
       <summary>Some text.</summary>
      </entry>
 `,
-			utils.NewError(LinkAlternateDuplicated, ""),
+			xmlutils.NewError(LinkAlternateDuplicated, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -441,7 +441,7 @@ func TestEntryBasic(t *testing.T) {
       <summary>Some text.</summary>
      </entry>
 `,
-			utils.NewError(LinkAlternateDuplicated, ""),
+			xmlutils.NewError(LinkAlternateDuplicated, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -507,7 +507,7 @@ func TestEntryBasic(t *testing.T) {
       <updated>2005-07-31T12:29:29Z</updated>
    </entry>
 `,
-			utils.NewError(MissingSummary, ""),
+			xmlutils.NewError(MissingSummary, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -539,7 +539,7 @@ func TestEntryBasic(t *testing.T) {
       <content src="http://g.com" type="application/xml"></content>  
    </entry>
 `,
-			utils.NewError(MissingSummary, ""),
+			xmlutils.NewError(MissingSummary, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -571,7 +571,7 @@ func TestEntryBasic(t *testing.T) {
       <content type="image/png">iVBORw0KGgoAAAANSUhEUgAAAB8AAAAqCAYAAABLGYAnAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QwCBCUlRSCuygAAAetJREFUWMPt1j1IVmEUB/Dfo1mvBg1iSgjhZNGnFIhTDUXQ25x9LE2NbQ1NLe1tbbo1tjQEDk2BUzSITUapUejyvkQthXKfhvvcEs3gvl55Fd4/HLgfz//8zzn3Ps85tBGhBc4oLuIYuvAV77CwW0F24x7mEbex+bSmu0rhEcz9R3SzzSXOjnEWjRLChTUSt2X0Y7EF4cIWk4+WMLUD4cKmtPhHr1cgvp58/RNd2zy/VdFf2518lcJsBVkXNls285GKt2qpE+4nDlUk/gu1Mpk3Ksy8UbbsSxWKL5UVn6lQfGZP7vM9ecK1/Wxva1drez/f1UlmX8xwHXTQQQcd7Ctkl8jGiMeJk8SeDe9uEI+Q1bfyYg/xNrGf7CaxRhzP77esPUy8soFXLwbIU4QaPuM6YY04SDxAOI2MMJGIw8Q0z4c14lg+k4dr6MEAoUkcIvYlzgAO4nKK5CgmknjIUou8mvflrJ6uH+Vt+k/09UR88rc64Xnq4Su4gzXiKMbxgHgBTzGcfEyirxivitH5LeF1yvIkXuLZptKdwQ98Q28Sf58ymsbd1NdPJMKHlPFCWgfnsIxmEo/NvHRxCB/xgng/ZfkFg1glTBPP4w3h+4agHhOW8TAvuVcpuBV8yrmxl7iKVKm4mn/WDtqA3yOQKuHaSApTAAAAAElFTkSuQmCC</content>
    </entry>
 `,
-			utils.NewError(MissingSummary, ""),
+			xmlutils.NewError(MissingSummary, ""),
 			NewTestEntry(
 				[]*Person{
 					NewTestPerson("Jean", "", ""),
@@ -601,7 +601,7 @@ func TestEntryBasic(t *testing.T) {
        <category scheme='https://www.yo.com' term='house' />
        <summary>Some text.</summary>
      </entry>`,
-			utils.NewError(MissingAuthor, ""),
+			xmlutils.NewError(MissingAuthor, ""),
 			NewTestEntry(
 				nil,
 				[]*Category{
@@ -691,7 +691,7 @@ func TestEntryBasic(t *testing.T) {
          <id>tag:example.org,2003:3</id>  
        </source>       
      </entry>`,
-			utils.NewError(MissingAuthor, ""),
+			xmlutils.NewError(MissingAuthor, ""),
 			NewTestEntry(
 				nil,
 				[]*Category{

@@ -3,9 +3,9 @@ package rss
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Image struct {
@@ -17,12 +17,12 @@ type Image struct {
 	Description *BasicElement
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewImage() *Image {
-	i := Image{depth: utils.NewDepthWatcher()}
+	i := Image{depth: xmlutils.NewDepthWatcher()}
 
 	i.Url = NewBasicElement()
 	i.Title = NewBasicElement()
@@ -37,7 +37,7 @@ func NewImage() *Image {
 }
 
 func NewImageExt(manager extension.Manager) *Image {
-	i := Image{depth: utils.NewDepthWatcher()}
+	i := Image{depth: xmlutils.NewDepthWatcher()}
 
 	i.Url = NewBasicElementExt(manager)
 	i.Title = NewBasicElementExt(manager)
@@ -53,23 +53,23 @@ func NewImageExt(manager extension.Manager) *Image {
 }
 
 func (i *Image) init() {
-	i.Url.Content = utils.NewElement("url", "", utils.Nop)
-	i.Url.Content.SetOccurence(utils.NewOccurence("url", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	i.Url.Content = xmlutils.NewElement("url", "", xmlutils.Nop)
+	i.Url.Content.SetOccurence(xmlutils.NewOccurence("url", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	i.Title.Content = utils.NewElement("title", "", utils.Nop)
-	i.Title.Content.SetOccurence(utils.NewOccurence("title", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	i.Title.Content = xmlutils.NewElement("title", "", xmlutils.Nop)
+	i.Title.Content.SetOccurence(xmlutils.NewOccurence("title", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	i.Link.Content = utils.NewElement("link", "", utils.Nop)
-	i.Link.Content.SetOccurence(utils.NewOccurence("link", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	i.Link.Content = xmlutils.NewElement("link", "", xmlutils.Nop)
+	i.Link.Content.SetOccurence(xmlutils.NewOccurence("link", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	i.Width.Content = utils.NewElement("width", "", utils.Nop)
-	i.Width.Content.SetOccurence(utils.NewOccurence("width", utils.UniqueValidator(AttributeDuplicated)))
+	i.Width.Content = xmlutils.NewElement("width", "", xmlutils.Nop)
+	i.Width.Content.SetOccurence(xmlutils.NewOccurence("width", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	i.Height.Content = utils.NewElement("height", "", utils.Nop)
-	i.Height.Content.SetOccurence(utils.NewOccurence("height", utils.UniqueValidator(AttributeDuplicated)))
+	i.Height.Content = xmlutils.NewElement("height", "", xmlutils.Nop)
+	i.Height.Content.SetOccurence(xmlutils.NewOccurence("height", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	i.Description.Content = utils.NewElement("description", "", utils.Nop)
-	i.Description.Content.SetOccurence(utils.NewOccurence("description", utils.UniqueValidator(AttributeDuplicated)))
+	i.Description.Content = xmlutils.NewElement("description", "", xmlutils.Nop)
+	i.Description.Content.SetOccurence(xmlutils.NewOccurence("description", xmlutils.UniqueValidator(AttributeDuplicated)))
 
 	i.Url.Parent = i
 	i.Title.Parent = i
@@ -88,7 +88,7 @@ func (i *Image) reset() {
 	i.Description.Content.Reset()
 }
 
-func (i *Image) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (i *Image) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if i.depth.IsRoot() {
 		i.reset()
 		for _, attr := range el.Attr {
@@ -133,8 +133,8 @@ func (i *Image) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils
 	return i, nil
 }
 
-func (i *Image) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if i.depth.Up() == utils.RootLevel {
+func (i *Image) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if i.depth.Up() == xmlutils.RootLevel {
 
 		return i.Parent, i.validate()
 	}
@@ -142,14 +142,14 @@ func (i *Image) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.Parse
 	return i, nil
 }
 
-func (i *Image) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (i *Image) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return i, nil
 }
 
-func (i *Image) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (i *Image) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("image", &error, i.Url.Content, i.Title.Content, i.Link.Content, i.Width.Content, i.Height.Content, i.Description.Content)
+	xmlutils.ValidateElements("image", &error, i.Url.Content, i.Title.Content, i.Link.Content, i.Width.Content, i.Height.Content, i.Description.Content)
 	i.Extension.Validate(&error)
 
 	return error.ErrorObject()

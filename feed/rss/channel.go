@@ -4,9 +4,9 @@ package rss
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Channel struct {
@@ -30,10 +30,10 @@ type Channel struct {
 	SkipDays       *BasicElement
 
 	Items      []*Item
-	Parent     utils.Visitor
+	Parent     xmlutils.Visitor
 	Extension  extension.VisitorExtension
-	depth      utils.DepthWatcher
-	Occurences utils.OccurenceCollection
+	depth      xmlutils.DepthWatcher
+	Occurences xmlutils.OccurenceCollection
 }
 
 func NewChannel() *Channel {
@@ -56,7 +56,7 @@ func NewChannel() *Channel {
 		SkipHours:      NewBasicElement(),
 		SkipDays:       NewBasicElement(),
 
-		depth: utils.NewDepthWatcher(),
+		depth: xmlutils.NewDepthWatcher(),
 	}
 
 	c.init()
@@ -84,7 +84,7 @@ func NewChannelExt(manager extension.Manager) *Channel {
 		SkipHours:      NewBasicElementExt(manager),
 		SkipDays:       NewBasicElementExt(manager),
 
-		depth: utils.NewDepthWatcher(),
+		depth: xmlutils.NewDepthWatcher(),
 	}
 
 	c.init()
@@ -95,18 +95,18 @@ func NewChannelExt(manager extension.Manager) *Channel {
 
 func (c *Channel) init() {
 
-	c.Title.Content = utils.NewElement("title", "", utils.Nop)
-	c.Link.Content = utils.NewElement("link", "", IsValidIRI)
-	c.Language.Content = utils.NewElement("language", "", utils.Nop)
-	c.Copyright.Content = utils.NewElement("copyright", "", utils.Nop)
-	c.ManagingEditor.Content = utils.NewElement("managingeditor", "", utils.Nop)
-	c.Webmaster.Content = utils.NewElement("webmaster", "", utils.Nop)
-	c.Generator.Content = utils.NewElement("generator", "", utils.Nop)
-	c.Docs.Content = utils.NewElement("docs", "", utils.Nop)
-	c.Ttl.Content = utils.NewElement("ttl", "", utils.Nop)
-	c.Rating.Content = utils.NewElement("rating", "", utils.Nop)
-	c.SkipHours.Content = utils.NewElement("skiphours", "", utils.Nop)
-	c.SkipDays.Content = utils.NewElement("skipdays", "", utils.Nop)
+	c.Title.Content = xmlutils.NewElement("title", "", xmlutils.Nop)
+	c.Link.Content = xmlutils.NewElement("link", "", IsValidIRI)
+	c.Language.Content = xmlutils.NewElement("language", "", xmlutils.Nop)
+	c.Copyright.Content = xmlutils.NewElement("copyright", "", xmlutils.Nop)
+	c.ManagingEditor.Content = xmlutils.NewElement("managingeditor", "", xmlutils.Nop)
+	c.Webmaster.Content = xmlutils.NewElement("webmaster", "", xmlutils.Nop)
+	c.Generator.Content = xmlutils.NewElement("generator", "", xmlutils.Nop)
+	c.Docs.Content = xmlutils.NewElement("docs", "", xmlutils.Nop)
+	c.Ttl.Content = xmlutils.NewElement("ttl", "", xmlutils.Nop)
+	c.Rating.Content = xmlutils.NewElement("rating", "", xmlutils.Nop)
+	c.SkipHours.Content = xmlutils.NewElement("skiphours", "", xmlutils.Nop)
+	c.SkipDays.Content = xmlutils.NewElement("skipdays", "", xmlutils.Nop)
 
 	c.Title.Parent = c
 	c.Link.Parent = c
@@ -126,24 +126,24 @@ func (c *Channel) init() {
 	c.SkipHours.Parent = c
 	c.SkipDays.Parent = c
 
-	c.Occurences = utils.NewOccurenceCollection(
-		utils.NewOccurence("title", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
-		utils.NewOccurence("link", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
-		utils.NewOccurence("description", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
-		utils.NewOccurence("language", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("copyright", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("managingeditor", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("webmaster", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("pubdate", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("lastbuilddate", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("generator", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("docs", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("cloud", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("ttl", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("image", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("rating", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("skiphours", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("skipdays", utils.UniqueValidator(AttributeDuplicated)),
+	c.Occurences = xmlutils.NewOccurenceCollection(
+		xmlutils.NewOccurence("title", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
+		xmlutils.NewOccurence("link", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
+		xmlutils.NewOccurence("description", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)),
+		xmlutils.NewOccurence("language", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("copyright", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("managingeditor", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("webmaster", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("pubdate", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("lastbuilddate", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("generator", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("docs", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("cloud", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("ttl", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("image", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("rating", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("skiphours", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("skipdays", xmlutils.UniqueValidator(AttributeDuplicated)),
 	)
 
 }
@@ -152,7 +152,7 @@ func (c *Channel) reset() {
 	c.Occurences.Reset()
 }
 
-func (c *Channel) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (c *Channel) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if c.depth.IsRoot() {
 		c.reset()
 		for _, attr := range el.Attr {
@@ -251,22 +251,22 @@ func (c *Channel) ProcessStartElement(el utils.StartElement) (utils.Visitor, uti
 	return c, nil
 }
 
-func (c *Channel) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if c.depth.Up() == utils.RootLevel {
+func (c *Channel) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if c.depth.Up() == xmlutils.RootLevel {
 		return c.Parent, c.validate()
 	}
 
 	return c, nil
 }
 
-func (c *Channel) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (c *Channel) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return c, nil
 }
 
-func (c *Channel) validate() utils.ParserError {
-	err := errors.NewErrorAggregator()
+func (c *Channel) validate() xmlutils.ParserError {
+	err := utils.NewErrorAggregator()
 
-	utils.ValidateOccurenceCollection("channel", &err, c.Occurences)
+	xmlutils.ValidateOccurenceCollection("channel", &err, c.Occurences)
 	c.Extension.Validate(&err)
 
 	return err.ErrorObject()

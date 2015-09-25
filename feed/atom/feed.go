@@ -4,9 +4,9 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Feed struct {
@@ -26,9 +26,9 @@ type Feed struct {
 	Entries      []*Entry
 
 	Extension  extension.VisitorExtension
-	Occurences utils.OccurenceCollection
-	depth      utils.DepthWatcher
-	Parent     utils.Visitor
+	Occurences xmlutils.OccurenceCollection
+	depth      xmlutils.DepthWatcher
+	Parent     xmlutils.Visitor
 }
 
 func NewFeed() *Feed {
@@ -42,7 +42,7 @@ func NewFeed() *Feed {
 		Title:     NewTextConstruct(),
 		Updated:   NewDate(),
 
-		depth: utils.NewDepthWatcher(),
+		depth: xmlutils.NewDepthWatcher(),
 	}
 
 	f.init()
@@ -61,7 +61,7 @@ func NewFeedExt(manager extension.Manager) *Feed {
 		Title:     NewTextConstructExt(manager),
 		Updated:   NewDateExt(manager),
 
-		depth: utils.NewDepthWatcher(),
+		depth: xmlutils.NewDepthWatcher(),
 	}
 
 	f.init()
@@ -82,15 +82,15 @@ func (f *Feed) init() {
 
 	f.InitCommonAttributes()
 
-	f.Occurences = utils.NewOccurenceCollection(
-		utils.NewOccurence("generator", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("icon", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("logo", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("id", utils.ExistsAndUniqueValidator(MissingId, IdDuplicated)),
-		utils.NewOccurence("rights", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("subtitle", utils.UniqueValidator(AttributeDuplicated)),
-		utils.NewOccurence("title", utils.ExistsAndUniqueValidator(MissingTitle, TitleDuplicated)),
-		utils.NewOccurence("updated", utils.ExistsAndUniqueValidator(MissingDate, AttributeDuplicated)),
+	f.Occurences = xmlutils.NewOccurenceCollection(
+		xmlutils.NewOccurence("generator", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("icon", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("logo", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("id", xmlutils.ExistsAndUniqueValidator(MissingId, IdDuplicated)),
+		xmlutils.NewOccurence("rights", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("subtitle", xmlutils.UniqueValidator(AttributeDuplicated)),
+		xmlutils.NewOccurence("title", xmlutils.ExistsAndUniqueValidator(MissingTitle, TitleDuplicated)),
+		xmlutils.NewOccurence("updated", xmlutils.ExistsAndUniqueValidator(MissingDate, AttributeDuplicated)),
 	)
 
 }
@@ -100,7 +100,7 @@ func (f *Feed) reset() {
 	f.Occurences.Reset()
 }
 
-func (f *Feed) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (f *Feed) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if f.depth.IsRoot() {
 		f.reset()
 		for _, attr := range el.Attr {
@@ -185,22 +185,22 @@ func (f *Feed) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.
 	return f, nil
 }
 
-func (f *Feed) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if f.depth.Up() == utils.RootLevel {
+func (f *Feed) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if f.depth.Up() == xmlutils.RootLevel {
 		return f.Parent, f.validate()
 	}
 
 	return f, nil
 }
 
-func (f *Feed) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (f *Feed) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return f, nil
 }
 
-func (f *Feed) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (f *Feed) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateOccurenceCollection("feed", &error, f.Occurences)
+	xmlutils.ValidateOccurenceCollection("feed", &error, f.Occurences)
 	f.Extension.Validate(&error)
 
 	f.validateLinks(&error)
@@ -211,7 +211,7 @@ func (f *Feed) validate() utils.ParserError {
 	return error.ErrorObject()
 }
 
-func (f *Feed) validateEntries(err *errors.ErrorAggregator) {
+func (f *Feed) validateEntries(err *utils.ErrorAggregator) {
 	combinations := make([]string, 0)
 
 	for _, entry := range f.Entries {
@@ -220,7 +220,7 @@ func (f *Feed) validateEntries(err *errors.ErrorAggregator) {
 		for _, comb := range combinations {
 
 			if s == comb {
-				err.NewError(utils.NewError(EntryWithIdAndDateDuplicated, fmt.Sprintf("Entries are duplicated: id '%s' updated '%s'", entry.Id.Content.Value, entry.Updated.Time.String())))
+				err.NewError(xmlutils.NewError(EntryWithIdAndDateDuplicated, fmt.Sprintf("Entries are duplicated: id '%s' updated '%s'", entry.Id.Content.Value, entry.Updated.Time.String())))
 				unique = false
 			}
 		}
@@ -231,7 +231,7 @@ func (f *Feed) validateEntries(err *errors.ErrorAggregator) {
 	}
 }
 
-func (f *Feed) validateAuthors(err *errors.ErrorAggregator) {
+func (f *Feed) validateAuthors(err *utils.ErrorAggregator) {
 	if len(f.Authors) > 0 {
 		return
 	}
@@ -245,11 +245,11 @@ func (f *Feed) validateAuthors(err *errors.ErrorAggregator) {
 	}
 
 	if count > 0 || len(f.Entries) == 0 {
-		err.NewError(utils.NewError(MissingAuthor, fmt.Sprintf("%v entry(ies) are missing author reference", count)))
+		err.NewError(xmlutils.NewError(MissingAuthor, fmt.Sprintf("%v entry(ies) are missing author reference", count)))
 	}
 }
 
-func (f *Feed) validateLinks(err *errors.ErrorAggregator) {
+func (f *Feed) validateLinks(err *utils.ErrorAggregator) {
 	combinations := make([]string, 0)
 	hasSelf := false
 
@@ -260,7 +260,7 @@ func (f *Feed) validateLinks(err *errors.ErrorAggregator) {
 
 			for _, comb := range combinations {
 				if s == comb {
-					err.NewError(utils.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
+					err.NewError(xmlutils.NewError(LinkAlternateDuplicated, fmt.Sprintf("Alternate Link duplicated: hreflang '%s' type '%s'", link.HrefLang.Value, link.Type.Value)))
 					unique = false
 				}
 			}
@@ -274,6 +274,6 @@ func (f *Feed) validateLinks(err *errors.ErrorAggregator) {
 	}
 
 	if !hasSelf {
-		err.NewError(utils.NewError(MissingSelfLink, "Feed must have a link with rel attribute set to 'self'"))
+		err.NewError(xmlutils.NewError(MissingSelfLink, "Feed must have a link with rel attribute set to 'self'"))
 	}
 }

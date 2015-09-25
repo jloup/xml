@@ -4,25 +4,25 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Source struct {
-	Url     utils.Element
-	Content utils.Element
+	Url     xmlutils.Element
+	Content xmlutils.Element
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewSource() *Source {
-	s := Source{depth: utils.NewDepthWatcher()}
+	s := Source{depth: xmlutils.NewDepthWatcher()}
 
-	s.Url = utils.NewElement("url", "", utils.Nop)
-	s.Url.SetOccurence(utils.NewOccurence("url", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	s.Url = xmlutils.NewElement("url", "", xmlutils.Nop)
+	s.Url.SetOccurence(xmlutils.NewOccurence("url", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
 	return &s
 }
@@ -38,7 +38,7 @@ func (s *Source) reset() {
 	s.Url.Reset()
 }
 
-func (s *Source) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (s *Source) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if s.depth.IsRoot() {
 		s.reset()
 		for _, attr := range el.Attr {
@@ -60,8 +60,8 @@ func (s *Source) ProcessStartElement(el utils.StartElement) (utils.Visitor, util
 	return s, nil
 }
 
-func (s *Source) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if s.depth.Up() == utils.RootLevel {
+func (s *Source) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if s.depth.Up() == xmlutils.RootLevel {
 
 		return s.Parent, s.validate()
 	}
@@ -69,15 +69,15 @@ func (s *Source) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.Pars
 	return s, nil
 }
 
-func (s *Source) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (s *Source) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	s.Content.Value = strings.TrimSpace(string(el))
 	return s, nil
 }
 
-func (s *Source) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (s *Source) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("source", &error, s.Url)
+	xmlutils.ValidateElements("source", &error, s.Url)
 	s.Extension.Validate(&error)
 
 	return error.ErrorObject()

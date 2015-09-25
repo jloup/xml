@@ -5,7 +5,7 @@ import (
 
 	"github.com/jloup/xml/feed/extension"
 	"github.com/jloup/xml/feed/rss"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 var CREATOR = xml.Name{Space: NS, Local: "creator"}
@@ -13,7 +13,7 @@ var CREATOR = xml.Name{Space: NS, Local: "creator"}
 func NewCreatorElement() extension.Element {
 	c := rss.NewBasicElement()
 
-	c.Content = utils.NewElement("creator", "", utils.Nop)
+	c.Content = xmlutils.NewElement("creator", "", xmlutils.Nop)
 
 	return c
 }

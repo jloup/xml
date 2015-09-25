@@ -3,45 +3,45 @@ package atom
 import (
 	"encoding/xml"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Link struct {
 	CommonAttributes
-	Href     utils.Element
-	Rel      utils.Element
-	Type     utils.Element
-	HrefLang utils.Element
-	Title    utils.Element
-	Length   utils.Element
+	Href     xmlutils.Element
+	Rel      xmlutils.Element
+	Type     xmlutils.Element
+	HrefLang xmlutils.Element
+	Title    xmlutils.Element
+	Length   xmlutils.Element
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewLink() *Link {
-	l := Link{depth: utils.NewDepthWatcher()}
+	l := Link{depth: xmlutils.NewDepthWatcher()}
 
-	l.Href = utils.NewElement("href", "", IsValidIRI)
-	l.Href.SetOccurence(utils.NewOccurence("href", utils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
+	l.Href = xmlutils.NewElement("href", "", IsValidIRI)
+	l.Href.SetOccurence(xmlutils.NewOccurence("href", xmlutils.ExistsAndUniqueValidator(MissingAttribute, AttributeDuplicated)))
 
-	l.Rel = utils.NewElement("rel", "alternate", utils.Nop)
-	l.Rel.SetOccurence(utils.NewOccurence("rel", utils.UniqueValidator(AttributeDuplicated)))
+	l.Rel = xmlutils.NewElement("rel", "alternate", xmlutils.Nop)
+	l.Rel.SetOccurence(xmlutils.NewOccurence("rel", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	l.Type = utils.NewElement("type", "", IsValidMIME)
-	l.Type.SetOccurence(utils.NewOccurence("type", utils.UniqueValidator(AttributeDuplicated)))
+	l.Type = xmlutils.NewElement("type", "", IsValidMIME)
+	l.Type.SetOccurence(xmlutils.NewOccurence("type", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	l.HrefLang = utils.NewElement("hreflang", "", utils.Nop)
-	l.HrefLang.SetOccurence(utils.NewOccurence("hreflang", utils.UniqueValidator(AttributeDuplicated)))
+	l.HrefLang = xmlutils.NewElement("hreflang", "", xmlutils.Nop)
+	l.HrefLang.SetOccurence(xmlutils.NewOccurence("hreflang", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	l.Title = utils.NewElement("title", "", utils.Nop)
-	l.Title.SetOccurence(utils.NewOccurence("title", utils.UniqueValidator(AttributeDuplicated)))
+	l.Title = xmlutils.NewElement("title", "", xmlutils.Nop)
+	l.Title.SetOccurence(xmlutils.NewOccurence("title", xmlutils.UniqueValidator(AttributeDuplicated)))
 
-	l.Length = utils.NewElement("length", "", IsValidLength)
-	l.Length.SetOccurence(utils.NewOccurence("length", utils.UniqueValidator(AttributeDuplicated)))
+	l.Length = xmlutils.NewElement("length", "", IsValidLength)
+	l.Length.SetOccurence(xmlutils.NewOccurence("length", xmlutils.UniqueValidator(AttributeDuplicated)))
 
 	l.InitCommonAttributes()
 
@@ -69,12 +69,12 @@ func (l *Link) reset() {
 	l.ResetAttr()
 }
 
-func (l *Link) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (l *Link) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if l.depth.IsRoot() {
 		l.reset()
 		for _, attr := range el.Attr {
 			switch attr.Name.Space {
-			case utils.XML_NS:
+			case xmlutils.XML_NS:
 				l.ProcessAttr(attr)
 
 			case "":
@@ -113,22 +113,22 @@ func (l *Link) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.
 	return l, nil
 }
 
-func (l *Link) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if l.depth.Up() == utils.RootLevel {
+func (l *Link) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if l.depth.Up() == xmlutils.RootLevel {
 		return l.Parent, l.validate()
 	}
 
 	return l, nil
 }
 
-func (l *Link) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (l *Link) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	return l, nil
 }
 
-func (l *Link) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (l *Link) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("link", &error, l.Href, l.Rel, l.Type, l.HrefLang, l.Title, l.Length)
+	xmlutils.ValidateElements("link", &error, l.Href, l.Rel, l.Type, l.HrefLang, l.Title, l.Length)
 	l.Extension.Validate(&error)
 	l.ValidateCommonAttributes("link", &error)
 

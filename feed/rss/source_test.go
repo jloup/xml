@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 	"fmt"
 	"testing"
 )
@@ -17,11 +17,11 @@ func NewTestSource(url, content string) *Source {
 
 type testSource struct {
 	XML            string
-	ExpectedError  utils.ParserError
+	ExpectedError  xmlutils.ParserError
 	ExpectedSource *Source
 }
 
-func testSourceValidator(actual utils.Visitor, expected utils.Visitor) error {
+func testSourceValidator(actual xmlutils.Visitor, expected xmlutils.Visitor) error {
 	s1 := actual.(*Source)
 	s2 := expected.(*Source)
 
@@ -36,12 +36,12 @@ func testSourceValidator(actual utils.Visitor, expected utils.Visitor) error {
 	return nil
 }
 
-func testSourceConstructor() utils.Visitor {
+func testSourceConstructor() xmlutils.Visitor {
 	return NewSource()
 }
 
-func _TestSourceToTestVisitor(t testSource) utils.TestVisitor {
-	testVisitor := utils.TestVisitor{
+func _TestSourceToTestVisitor(t testSource) xmlutils.TestVisitor {
+	testVisitor := xmlutils.TestVisitor{
 		XML:                t.XML,
 		ExpectedError:      nil,
 		ExpectedVisitor:    t.ExpectedSource,
@@ -59,7 +59,7 @@ func TestSourceBasic(t *testing.T) {
 
 	var testdata = []testSource{
 		{`<source>Tomalak's Realm</source>`,
-			utils.NewError(MissingAttribute, ""),
+			xmlutils.NewError(MissingAttribute, ""),
 			NewTestSource("", "Tomalak's Realm"),
 		},
 		{`<source url="http://www.tomaltak.org/links2.xml">Tomalak's Realm</source>`,

@@ -1,7 +1,7 @@
 package rss
 
-import "github.com/jloup/xml/utils"
+import xmlutils "github.com/jloup/xml/utils"
 
 var (
-	IsValidIRI = utils.IsValidIri(IriNotValid)
+	IsValidIRI = xmlutils.IsValidIri(IriNotValid)
 )

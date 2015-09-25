@@ -167,7 +167,7 @@ if err != nil {
 }
 
 // the input feed should be 100% compliant to spec...
-flags := utils.NewErrorChecker(utils.EnableAllError)
+flags := xmlutils.NewErrorChecker(xmlutils.EnableAllError)
 
 //... but it is OK if Atom entry does not have <updated> field
 flags.DisableErrorChecking("entry", atom.MissingDate)

@@ -4,17 +4,17 @@ package feed
 import (
 	"io"
 
-	"github.com/jloup/flag"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
-var NoFeedFound = flag.InitFlag(&utils.ErrorFlagCounter, "NoFeedFound")
+var NoFeedFound = utils.InitFlag(&xmlutils.ErrorFlagCounter, "NoFeedFound")
 
 // ParseOptions is passed to Parse functions to customize their behaviors
 type ParseOptions struct {
 	ExtensionManager extension.Manager
-	ErrorFlags       utils.FlagChecker
+	ErrorFlags       xmlutils.FlagChecker
 }
 
 // DefaultOptions set options in order to have:
@@ -23,7 +23,7 @@ type ParseOptions struct {
 var DefaultOptions ParseOptions
 
 func init() {
-	errorFlags := utils.NewErrorChecker(utils.DisableAllError)
+	errorFlags := xmlutils.NewErrorChecker(xmlutils.DisableAllError)
 	DefaultOptions = ParseOptions{
 		extension.Manager{},
 		&errorFlags,
@@ -34,14 +34,14 @@ func init() {
 func ParseCustom(r io.Reader, feed UserFeed, options ParseOptions) error {
 	w := newWrapperExt(options.ExtensionManager)
 
-	err := utils.Walk(r, w, options.ErrorFlags)
+	err := xmlutils.Walk(r, w, options.ErrorFlags)
 
 	if err != nil {
 		return err
 	}
 
 	if w.AtomFeed == nil && w.RssChannel == nil && w.AtomEntry == nil {
-		return utils.NewError(NoFeedFound, "no feed has been found")
+		return xmlutils.NewError(NoFeedFound, "no feed has been found")
 	}
 
 	w.Populate(feed)

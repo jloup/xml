@@ -4,25 +4,25 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/jloup/errors"
+	"github.com/jloup/utils"
 	"github.com/jloup/xml/feed/extension"
-	"github.com/jloup/xml/utils"
+	xmlutils "github.com/jloup/xml/utils"
 )
 
 type Guid struct {
-	IsPermalink utils.Element
-	Content     utils.Element
+	IsPermalink xmlutils.Element
+	Content     xmlutils.Element
 
 	Extension extension.VisitorExtension
-	Parent    utils.Visitor
-	depth     utils.DepthWatcher
+	Parent    xmlutils.Visitor
+	depth     xmlutils.DepthWatcher
 }
 
 func NewGuid() *Guid {
-	g := Guid{depth: utils.NewDepthWatcher()}
+	g := Guid{depth: xmlutils.NewDepthWatcher()}
 
-	g.IsPermalink = utils.NewElement("isPermalink", "true", utils.Nop)
-	g.IsPermalink.SetOccurence(utils.NewOccurence("isPermalink", utils.UniqueValidator(AttributeDuplicated)))
+	g.IsPermalink = xmlutils.NewElement("isPermalink", "true", xmlutils.Nop)
+	g.IsPermalink.SetOccurence(xmlutils.NewOccurence("isPermalink", xmlutils.UniqueValidator(AttributeDuplicated)))
 
 	return &g
 }
@@ -39,7 +39,7 @@ func (g *Guid) reset() {
 	g.IsPermalink.Value = "true"
 }
 
-func (g *Guid) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.ParserError) {
+func (g *Guid) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, xmlutils.ParserError) {
 	if g.depth.IsRoot() {
 		g.reset()
 		for _, attr := range el.Attr {
@@ -61,23 +61,23 @@ func (g *Guid) ProcessStartElement(el utils.StartElement) (utils.Visitor, utils.
 	return g, nil
 }
 
-func (g *Guid) ProcessEndElement(el xml.EndElement) (utils.Visitor, utils.ParserError) {
-	if g.depth.Up() == utils.RootLevel {
+func (g *Guid) ProcessEndElement(el xml.EndElement) (xmlutils.Visitor, xmlutils.ParserError) {
+	if g.depth.Up() == xmlutils.RootLevel {
 		return g.Parent, g.validate()
 	}
 
 	return g, nil
 }
 
-func (g *Guid) ProcessCharData(el xml.CharData) (utils.Visitor, utils.ParserError) {
+func (g *Guid) ProcessCharData(el xml.CharData) (xmlutils.Visitor, xmlutils.ParserError) {
 	g.Content.Value = strings.TrimSpace(string(el))
 	return g, nil
 }
 
-func (g *Guid) validate() utils.ParserError {
-	error := errors.NewErrorAggregator()
+func (g *Guid) validate() xmlutils.ParserError {
+	error := utils.NewErrorAggregator()
 
-	utils.ValidateElements("guid", &error, g.IsPermalink)
+	xmlutils.ValidateElements("guid", &error, g.IsPermalink)
 	g.Extension.Validate(&error)
 
 	return error.ErrorObject()
