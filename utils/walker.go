@@ -3,12 +3,12 @@ package utils
 
 import (
 	"bytes"
-	"code.google.com/p/go-charset/charset"
-	_ "code.google.com/p/go-charset/data"
 	"encoding/xml"
 	"io"
 	"io/ioutil"
 	"strings"
+
+	"golang.org/x/net/html/charset"
 )
 
 type StartElement struct {
@@ -27,7 +27,7 @@ func Walk(r io.Reader, v Visitor, custom FlagChecker) ParserError {
 	b = bytes.TrimSpace(b)
 	r = bytes.NewReader(b)
 	dec := xml.NewDecoder(r)
-	dec.CharsetReader = charset.NewReader
+	dec.CharsetReader = charset.NewReaderLabel
 
 	var t xml.Token
 	var startVisitor Visitor
