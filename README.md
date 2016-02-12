@@ -1,5 +1,6 @@
 ## Feed Parser (RSS, Atom)
 [![GoDoc](https://godoc.org/github.com/jloup/xml/feed?status.svg)](https://godoc.org/github.com/jloup/xml/feed)
+[![Travis Build Status](https://travis-ci.org/jloup/xml.svg?branch=master)](https://travis-ci.org/jloup/xml)
 
 Package feed implements a flexible and efficient RSS/Atom parser. 
 
