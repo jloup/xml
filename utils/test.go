@@ -25,7 +25,7 @@ func (t *TestVisitor) CheckTestCaseErrorsEnabled() error {
 
 	v := t.VisitorConstructor()
 
-	err := Walk(strings.NewReader(t.XML), v, t.CustomError)
+	err := Walk(strings.NewReader(t.XML), v, t.CustomError, 0)
 
 	if err != nil && t.ExpectedError != nil {
 		if !err.Flag().Cmp(t.ExpectedError.Flag()) {
@@ -53,7 +53,7 @@ func (t *TestVisitor) CheckTestCaseErrorsDisabled() error {
 	errorCheck := NewErrorChecker(DisableAllError)
 	v := t.VisitorConstructor()
 
-	err := Walk(strings.NewReader(t.XML), v, &errorCheck)
+	err := Walk(strings.NewReader(t.XML), v, &errorCheck, 0)
 
 	if err != nil {
 		return fmt.Errorf("[Disabled Errors - Unexpected error] %v", err)

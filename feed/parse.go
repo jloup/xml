@@ -13,8 +13,12 @@ var NoFeedFound = utils.InitFlag(&xmlutils.ErrorFlagCounter, "NoFeedFound")
 
 // ParseOptions is passed to Parse functions to customize their behaviors
 type ParseOptions struct {
+	// extensions to use while parsing
 	ExtensionManager extension.Manager
-	ErrorFlags       xmlutils.FlagChecker
+	// enable/disable error checking
+	ErrorFlags xmlutils.FlagChecker
+	// number of retry to recover from bad input
+	XMLTokenErrorRetry int
 }
 
 // DefaultOptions set options in order to have:
@@ -27,6 +31,7 @@ func init() {
 	DefaultOptions = ParseOptions{
 		extension.Manager{},
 		&errorFlags,
+		0,
 	}
 }
 
@@ -34,7 +39,7 @@ func init() {
 func ParseCustom(r io.Reader, feed UserFeed, options ParseOptions) error {
 	w := newWrapperExt(options.ExtensionManager)
 
-	err := xmlutils.Walk(r, w, options.ErrorFlags)
+	err := xmlutils.Walk(r, w, options.ErrorFlags, options.XMLTokenErrorRetry)
 
 	if err != nil {
 		return err

@@ -2,12 +2,13 @@
 [![GoDoc](https://godoc.org/github.com/jloup/xml/feed?status.svg)](https://godoc.org/github.com/jloup/xml/feed)
 [![Travis Build Status](https://travis-ci.org/jloup/xml.svg?branch=master)](https://travis-ci.org/jloup/xml)
 
-Package feed implements a flexible and efficient RSS/Atom parser. 
+Package feed implements a flexible, robust and efficient RSS/Atom parser.
 
 If you just want some bytes to be quickly parsed into an object without care about underlying feed type, you can start with this: [Simple Use](#simple)
 
 If you want to take a deeper dive into how you can customize the parser behavior:
 - [Extending BasicFeed](#userfeed)
+- [Robustness and recovery from bad input](#robustness)
 - [Parse with specification compliancy checking](#spec)
 - [RSS and Atom extensions](#extension)
 
@@ -150,6 +151,36 @@ Output:
 FEED 'Me, Myself and I' generated with http://www.atomgenerator.com/ V1.0
 	#0 'Breakfast' (http://example.org/2005/04/02/breakfast)
 	#1 'Dinner' (http://example.org/2005/04/02/dinner)
+```
+
+#### <a name="robustness"></a>Robustness and recovery from bad input
+Feeds are wildly use and it is quite common that a single invalid character, missing closing/starting tag invalidate the whole feed. Standard encoding/xml is quite pedantic (as it should) about input xml.
+
+In order to produce an output feed at all cost, you can set the number of times you want the parser to recover from invalid input via XMLTokenErrorRetry field in ParseOptions. The strategy is quite simple, if xml decoder returns an XMLTokenError while parsing, the faulty token will be removed from input and the parser will retry to build a feed from it. It useful when invalid html, xml is present in content tag (atom) for example.
+
+Example:
+```go
+f, err := os.Open("testdata/invalid_atom.xml")
+
+opt := feed.DefaultOptions
+opt.XMLTokenErrorRetry = 1
+
+_, err = feed.Parse(f, opt)
+
+if err != nil {
+  fmt.Printf("Cannot parse feed: %s\n", err)
+} else {
+  fmt.Println("no error")
+}
+```
+Output:
+```
+no error
+```
+
+with XMLTokenError set to 0, it would have produced the following error:
+```
+Cannot parse feed: [XMLTokenError] XML syntax error on line 574: illegal character code U+000C
 ```
 
 #### <a name="spec"></a>Parse with specification compliancy checking

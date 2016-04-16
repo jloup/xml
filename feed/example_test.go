@@ -1,7 +1,9 @@
 package feed_test
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/jloup/xml/feed"
@@ -69,4 +71,45 @@ func ExampleParseOptions() {
 	//in 'feed':
 	//[MissingId]
 	//	feed's id should exist
+}
+
+func ExampleParse_recover() {
+	f, err := os.Open("testdata/invalid_atom.xml")
+
+	if err != nil {
+		return
+	}
+
+	b, _ := ioutil.ReadAll(f)
+	opt := feed.DefaultOptions
+
+	// no retry (default)
+	fmt.Println("attempt #1 with XMLTokenErrorRetry=0")
+	opt.XMLTokenErrorRetry = 0
+
+	_, err = feed.Parse(bytes.NewReader(b), opt)
+
+	if err != nil {
+		fmt.Printf("\t->Cannot parse feed: %s\n", err)
+	} else {
+		fmt.Println("\t->no error")
+	}
+
+	// one retry
+	fmt.Println("attempt #2 with XMLTokenErrorRetry=1")
+	opt.XMLTokenErrorRetry = 1
+
+	_, err = feed.Parse(bytes.NewReader(b), opt)
+
+	if err != nil {
+		fmt.Printf("\t->Cannot parse feed: %s\n", err)
+	} else {
+		fmt.Println("\t->no error")
+	}
+
+	// Output:
+	//attempt #1 with XMLTokenErrorRetry=0
+	//	->Cannot parse feed: [XMLTokenError] XML syntax error on line 574: illegal character code U+000C
+	//attempt #2 with XMLTokenErrorRetry=1
+	//	->no error
 }

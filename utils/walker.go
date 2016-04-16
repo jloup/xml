@@ -16,7 +16,7 @@ type StartElement struct {
 	Ns *Namespaces
 }
 
-func Walk(r io.Reader, v Visitor, custom FlagChecker) ParserError {
+func Walk(r io.Reader, v Visitor, custom FlagChecker, xmlTokenErrorRetry int) ParserError {
 
 	var err error
 	b, err := ioutil.ReadAll(r)
@@ -24,67 +24,84 @@ func Walk(r io.Reader, v Visitor, custom FlagChecker) ParserError {
 		return NewError(IOError, "Cannot read content")
 	}
 
-	b = bytes.TrimSpace(b)
-	r = bytes.NewReader(b)
-	dec := xml.NewDecoder(r)
-	dec.CharsetReader = charset.NewReaderLabel
-
-	var t xml.Token
-	var startVisitor Visitor
-	var perr ParserError
-	var tokenName string
-	var element StartElement
-	namespaces := Namespaces{}
-
 	for {
 
-		if t, err = dec.Token(); err != nil {
-			if err == io.EOF {
-				return nil
+		b = bytes.TrimSpace(b)
+		r = bytes.NewReader(b)
+		dec := xml.NewDecoder(r)
+		dec.CharsetReader = charset.NewReaderLabel
+
+		var t xml.Token
+		var startOffset int64
+		var endOffset int64
+		var startVisitor Visitor
+		var perr ParserError
+		var tokenName string
+		var element StartElement
+		namespaces := Namespaces{}
+
+		for {
+
+			if t, err = dec.Token(); err != nil {
+				if err == io.EOF {
+					return nil
+				}
+
+				// XMLTokenError - should we retry ?
+				if xmlTokenErrorRetry <= 0 {
+					return Error{flag: XMLTokenError, msg: err.Error()} // we must abort
+				} else {
+					endOffset = dec.InputOffset()
+					b = append(b[:startOffset], b[endOffset:]...)
+					xmlTokenErrorRetry -= 1
+					break
+				}
 			}
 
-			return Error{flag: XMLTokenError, msg: err.Error()} // we must abort
-		}
+			switch tt := t.(type) {
+			case xml.SyntaxError:
+				return Error{flag: XMLSyntaxError, msg: tt.Error()} // we must abort
 
-		switch tt := t.(type) {
-		case xml.SyntaxError:
-			return Error{flag: XMLSyntaxError, msg: tt.Error()} // we must abort
+			case xml.Comment:
+			case xml.Directive:
+			case xml.ProcInst:
 
-		case xml.Comment:
-		case xml.Directive:
-		case xml.ProcInst:
+			case xml.StartElement:
+				tokenName = tt.Name.Local
+				namespaces.Inc(tt.Name.Space)
 
-		case xml.StartElement:
-			tokenName = tt.Name.Local
-			namespaces.Inc(tt.Name.Space)
+				element = StartElement{&tt, &namespaces}
+				element.Name.Space = strings.ToLower(tt.Name.Space)
+				element.Name.Local = strings.ToLower(tt.Name.Local)
+				for i, _ := range element.Attr {
+					element.Attr[i].Name.Space = strings.ToLower(element.Attr[i].Name.Space)
+					element.Attr[i].Name.Local = strings.ToLower(element.Attr[i].Name.Local)
+				}
+				startVisitor, perr = v.ProcessStartElement(element)
 
-			element = StartElement{&tt, &namespaces}
-			element.Name.Space = strings.ToLower(tt.Name.Space)
-			element.Name.Local = strings.ToLower(tt.Name.Local)
-			for i, _ := range element.Attr {
-				element.Attr[i].Name.Space = strings.ToLower(element.Attr[i].Name.Space)
-				element.Attr[i].Name.Local = strings.ToLower(element.Attr[i].Name.Local)
+				if startVisitor == nil {
+					startOffset = dec.InputOffset()
+					dec.Skip()
+				} else {
+					startOffset = dec.InputOffset()
+					v = startVisitor
+				}
+
+			case xml.EndElement:
+				tokenName = tt.Name.Local
+				namespaces.Dec(tt.Name.Space)
+				v, perr = v.ProcessEndElement(tt)
+				startOffset = dec.InputOffset()
+			case xml.CharData:
+				v, perr = v.ProcessCharData(tt)
+				startOffset = dec.InputOffset()
 			}
-			startVisitor, perr = v.ProcessStartElement(element)
 
-			if startVisitor == nil {
-				dec.Skip()
-			} else {
-				v = startVisitor
+			if perr != nil && custom.CheckFlag(tokenName, perr) {
+				return &delegatedError{delegatedError: custom.ErrorWithCode(tokenName, perr), tokenName: tokenName}
 			}
 
-		case xml.EndElement:
-			tokenName = tt.Name.Local
-			namespaces.Dec(tt.Name.Space)
-			v, perr = v.ProcessEndElement(tt)
-		case xml.CharData:
-			v, perr = v.ProcessCharData(tt)
-		}
-
-		if perr != nil && custom.CheckFlag(tokenName, perr) {
-			return &delegatedError{delegatedError: custom.ErrorWithCode(tokenName, perr), tokenName: tokenName}
 		}
 
 	}
-
 }
