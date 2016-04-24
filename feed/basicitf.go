@@ -21,6 +21,7 @@ type BasicFeedBlock struct {
 	Title string
 	Id    string
 	Date  time.Time
+	Image string
 }
 
 // BasicFeed is a basic UserFeed
@@ -47,6 +48,7 @@ func (b *BasicFeedBlock) PopulateFromAtomFeed(f *atom.Feed) {
 	b.Title = f.Title.String()
 	b.Date = f.Updated.Time
 	b.Id = f.Id.String()
+	b.Image = f.Logo.Iri.String()
 }
 
 func (b *BasicEntryBlock) PopulateFromAtomEntry(e *atom.Entry) {
@@ -66,6 +68,7 @@ func (b *BasicFeedBlock) PopulateFromRssChannel(c *rss.Channel) {
 	b.Title = c.Title.String()
 	b.Date = c.LastBuildDate.Time
 	b.Id = c.Link.String()
+	b.Image = c.Image.Url.String()
 }
 
 func (b *BasicEntryBlock) PopulateFromRssItem(item *rss.Item) {

@@ -63,6 +63,7 @@ type BasicFeed struct {
   Title   string
   Id      string // Atom:feed:id | RSS:channel:link 
   Date    time.Time
+  Image   string // Atom:feed:logo:iri | RSS:channel:image:url
   Entries []BasicEntryBlock
 }
 
