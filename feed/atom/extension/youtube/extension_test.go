@@ -9,7 +9,7 @@ import (
 	xmlutils "github.com/jloup/xml/utils"
 )
 
-func NewTestYoutubeFeed(channelId string, entries []*atom.Entry) *atom.Feed {
+func NewTestYoutubeFeed(channelId string, playlistId string, entries []*atom.Entry) *atom.Feed {
 	f := atom.NewFeed()
 
 	f.Entries = entries
@@ -17,6 +17,12 @@ func NewTestYoutubeFeed(channelId string, entries []*atom.Entry) *atom.Feed {
 		c := atom.NewBasicElement(nil)
 		c.Content.Value = channelId
 		f.Extension.Store.Add(_channelId, c)
+	}
+
+	if playlistId != "" {
+		c := atom.NewBasicElement(nil)
+		c.Content.Value = playlistId
+		f.Extension.Store.Add(_playlistId, c)
 	}
 
 	return f
@@ -63,6 +69,18 @@ func testYoutubeFeedValidator(actual xmlutils.Visitor, expected xmlutils.Visitor
 		}
 	}
 
+	playlistId1, ok1 := GetFeedPlaylistId(f1)
+	playlistId2, ok2 := GetFeedPlaylistId(f2)
+
+	if ok1 != ok2 {
+		return fmt.Errorf("youtube playlistId presence does not match %v (expected) vs %v", ok2, ok1)
+	}
+
+	if ok1 {
+		if playlistId1.String() != playlistId2.String() {
+			return fmt.Errorf("youtube playlistId do not match '%s' (expected) vs '%s'", playlistId2.String(), playlistId1.String())
+		}
+	}
 	if len(f1.Entries) != len(f2.Entries) {
 		return fmt.Errorf("Feed does not contain the right count of Entries %v (expected) vs %v", len(f2.Entries), len(f1.Entries))
 	}
@@ -144,19 +162,20 @@ func TestYoutubeFeedBasic(t *testing.T) {
 		{`
 		<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015">
 		  <yt:channelId>UCwg2zBWt4C55xcRKG-ThmXQ</yt:channelId>
+		  <yt:channelId>UCwgBWt4C55xcRKG-ThmXQ</yt:channelId>
 		  <entry>
 		    <id>yt:video:aF4JE5XmkfY</id>
 		    <yt:videoId>aF4JE5XmkfY</yt:videoId>
 		    <yt:channelId>UCwg2zBWt4C55xcRKG-ThmXQ</yt:channelId>
-        </entry>
+                  </entry>
 		  <entry>
 		    <id>yt:video:badaboum</id>
 		    <yt:videoId>badaboum</yt:videoId>
 		    <yt:channelId>UCwg2zBWt4C55xcRKG-ThmXQ</yt:channelId>
-        </entry>
+                  </entry>
 		</feed>`,
 			nil,
-			NewTestYoutubeFeed("UCwg2zBWt4C55xcRKG-ThmXQ", []*atom.Entry{
+			NewTestYoutubeFeed("UCwg2zBWt4C55xcRKG-ThmXQ", "", []*atom.Entry{
 				NewTestYoutubeEntry(
 					"aF4JE5XmkfY",
 					"UCwg2zBWt4C55xcRKG-ThmXQ",
@@ -176,7 +195,7 @@ func TestYoutubeFeedBasic(t *testing.T) {
 		</entry>
 		 `,
 			xmlutils.NewError(atom.AttributeDuplicated, ""),
-			NewTestYoutubeFeed("", []*atom.Entry{
+			NewTestYoutubeFeed("", "", []*atom.Entry{
 				NewTestYoutubeEntry(
 					"aF4JE5XmkfY",
 					"UCwg2zBWt4C55xcRKG-ThmXQ",
