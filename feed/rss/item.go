@@ -126,7 +126,8 @@ func (i *Item) ProcessStartElement(el xmlutils.StartElement) (xmlutils.Visitor, 
 
 		case "author":
 			i.Occurences.Inc("author")
-			return i.Title.ProcessStartElement(el)
+			return i.Author.ProcessStartElement(el)
+
 		case "category":
 			category := NewCategoryExt(i.Extension.Manager)
 			category.Parent = i
